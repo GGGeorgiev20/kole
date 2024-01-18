@@ -1,0 +1,22 @@
+output: main
+
+directories:
+  src: src
+  obj: obj
+  bin: bin
+  include: []
+  lib: []
+
+ignore: [ include, lib ]
+
+flags:
+  error_flags: -Wall -Wunused-variable -Wextra -Wno-enum-compare -g -ggdb -fdiagnostics-color=always
+  windows_lib_flags: -lgdi32 -lwinmm -static-libstdc++
+  unix_lib_flags: -lm -lpthread -ldl -lrt -lX11
+  end_flags: -lyaml-cpp
+
+compiler_version: g++
+language_version: c++20
+
+# Debug / Release
+build_type: debug

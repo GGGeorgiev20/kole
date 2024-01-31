@@ -46,6 +46,7 @@ def get_flags():
     if config['build_type'] == "debug":
         flags += " -O0"
     elif config['build_type'] == "release":
+        print("INFO: Building in release mode")
         flags += " -O3"
     else:
         print("ERROR: Invalid build type in config. Exiting...")
@@ -58,11 +59,19 @@ def get_args():
         "clear": False
     }
 
+    default_args = False
+
     for arg in sys.argv[1:]:
         if arg in args:
             args[arg] = True
+            default_args = True
         else:
             print(f"WARNING: Invalid flag '{arg}'. Ignoring...")
+
+    if default_args:
+        print("INFO: No flags specified, using default flags")
+    elif args['clear']:
+        print("INFO: Rebuilding all files...")
 
     return args
 
@@ -71,6 +80,11 @@ def get_output_extension():
         return "exe"
     else:
         return "out"
+    
+def clear():
+    for file in os.listdir(config['directories']['obj']):
+        file_path = os.path.join(config['directories']['obj'], file)
+        os.remove(file_path)
 
 def run_command(*args):
     try:
@@ -91,7 +105,7 @@ def compile(dir, file):
     global compiled
     compiled.append(object_file)
 
-    if not sys_args['clear'] and os.path.exists(object_file) and os.path.getmtime(compiled_file) < os.path.getmtime(object_file):
+    if os.path.exists(object_file) and os.path.getmtime(compiled_file) < os.path.getmtime(object_file):
         return
     
     run_command(f"{config['compiler_version']} {flags} -c {compiled_file} -o {object_file}")
@@ -108,14 +122,17 @@ def main():
     
     create_dirs()
 
-    global flags
-    flags = get_flags()
-
     global sys_args
     sys_args = get_args()
 
+    global flags
+    flags = get_flags()
+
     global compiled
     compiled = []
+
+    if sys_args['clear']:
+        clear()
 
     for [dir, _, files] in os.walk(config['directories']['src']):
         for file in files:

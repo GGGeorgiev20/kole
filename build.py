@@ -56,22 +56,21 @@ def get_flags():
 
 def get_args():
     args = {
-        "clear": False
+        "clear": False,
+        "run": False
     }
 
-    default_args = False
+    default_args = True
 
     for arg in sys.argv[1:]:
         if arg in args:
             args[arg] = True
-            default_args = True
+            default_args = False
         else:
             print(f"WARNING: Invalid flag '{arg}'. Ignoring...")
 
     if default_args:
         print("INFO: No flags specified, using default flags")
-    elif args['clear']:
-        print("INFO: Rebuilding all files...")
 
     return args
 
@@ -82,9 +81,23 @@ def get_output_extension():
         return "out"
     
 def clear():
+    print("INFO: Rebuilding all files...")
+
     for file in os.listdir(config['directories']['obj']):
         file_path = os.path.join(config['directories']['obj'], file)
         os.remove(file_path)
+
+def run(output_path):
+    print("\nINFO: Running build...")
+
+    command = output_path
+
+    if platform.system() == "Windows":
+        command = output_path.replace('/', '\\')
+    else:
+        command = f"./{output_path}"
+    
+    os.system(command)
 
 def run_command(*args):
     try:
@@ -118,6 +131,7 @@ def main():
     config = load_config()
 
     if not config:
+        print("ERROR: No config file found. Exiting...")
         exit(1)
     
     create_dirs()
@@ -144,6 +158,9 @@ def main():
     run_command(f"{config['compiler_version']} -std={config['language_version']} {flags} -o {output_path} {' '.join(compiled)} {config['flags']['end_flags']}")
 
     print("INFO: Build successful")
+
+    if sys_args['run']:
+        run(output_path)
 
 if __name__ == "__main__":
     main()

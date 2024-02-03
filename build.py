@@ -9,7 +9,7 @@ def check_imports():
     try:
         import yaml
     except ImportError:
-        print("WARNING: PyYAML not found. Installing...")
+        print("ERROR: PyYAML not found. Installing...")
         subprocess.check_call(['pip', 'install', 'PyYAML'])
 
 def load_config():
@@ -22,7 +22,7 @@ def load_config():
             data = yaml.safe_load(file)
             return data
         except yaml.YAMLError as e:
-            print(f"ERROR: Couldn't read config: {e}")
+            print(f"FATAL: Couldn't read config: {e}")
             return None
 
 def create_dirs():
@@ -49,7 +49,7 @@ def get_flags():
         print("INFO: Building in release mode")
         flags += " -O3"
     else:
-        print("ERROR: Invalid build type in config. Exiting...")
+        print("FATAL: Invalid build type in config. Exiting...")
         exit(1)
 
     return flags
@@ -70,7 +70,7 @@ def get_args():
             print(f"WARNING: Invalid flag '{arg}'. Ignoring...")
 
     if default_args:
-        print("INFO: No flags specified, using default flags")
+        print("BUILD: No flags specified, using default flags")
 
     return args
 
@@ -81,14 +81,14 @@ def get_output_extension():
         return "out"
     
 def clear():
-    print("INFO: Rebuilding all files...")
+    print("BUILD: Rebuilding all files...\n")
 
     for file in os.listdir(config['directories']['obj']):
         file_path = os.path.join(config['directories']['obj'], file)
         os.remove(file_path)
 
 def run(output_path):
-    print("\nINFO: Running build...")
+    print("\nBUILD: Running build...\n")
 
     command = output_path
 
@@ -124,7 +124,7 @@ def compile(dir, file):
     run_command(f"{config['compiler_version']} {flags} -c {compiled_file} -o {object_file}")
 
     post_index = len(config['directories']['src']) + 1
-    print(f'BUILD: Compiled {compiled_file[post_index:]}')
+    print(f'Compiled {compiled_file[post_index:]}')
 
 def main():
     global config
@@ -157,7 +157,7 @@ def main():
 
     run_command(f"{config['compiler_version']} -std={config['language_version']} {flags} -o {output_path} {' '.join(compiled)} {config['flags']['end_flags']}")
 
-    print("INFO: Build successful")
+    print("BUILD: Build successful")
 
     if sys_args['run']:
         run(output_path)

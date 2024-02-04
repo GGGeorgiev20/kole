@@ -35,13 +35,21 @@ def create_dirs():
         if not key in config['ignore'] and not os.path.exists(dir):
             os.makedirs(dir)
 
+def get_flag(flag):
+    result = config['flags'][flag]
+    
+    if result != "None":
+        return result
+    else:
+        return ""
+
 def get_flags():
-    flags = f"{config['flags']['error_flags']} "
+    flags = f"{get_flag('error_flags')} "
 
     if platform.system() == "Windows":
-        flags += config['flags']['windows_lib_flags']
+        flags += get_flag('windows_lib_flags')
     else:
-        flags += config['flags']['unix_lib_flags']
+        flags += get_flag('unix_lib_flags')
 
     if config['build_type'] == "debug":
         flags += " -O0"
@@ -155,9 +163,9 @@ def main():
     output_extension = get_output_extension()
     output_path = f"{config['directories']['bin']}/{config['output']}.{output_extension}"
 
-    run_command(f"{config['compiler_version']} -std={config['language_version']} {flags} -o {output_path} {' '.join(compiled)} {config['flags']['end_flags']}")
+    run_command(f"{config['compiler_version']} -std={config['language_version']} {flags} -o {output_path} {' '.join(compiled)} {get_flag('end_flags')}")
 
-    print("BUILD: Build successful")
+    print("\nBUILD: Build successful")
 
     if sys_args['run']:
         run(output_path)

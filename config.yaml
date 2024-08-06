@@ -1,19 +1,29 @@
+# This is the final output file of the program
 output: main
+
+# These are all the program directories
+# src      -  This is where all the source files are located   (you can technically also keep the header files here, but it's not recommended)
+# obj      -  Here are built all source files to object files
+# bin      -  Here is located the final output file
+# include  -  Here should be located all header files
+#
+# To include multiple directories, use square brackets eg. [ include ]
+# To signify a directory shouldn't be created, put it in the ignore array
+# warning: if the directory should exist, but it doesn't and it's in the ignore, an error will be raised
 
 directories:
   src: src
   obj: obj
   bin: bin
-  include: []
-  lib: []
+  include: include
 
-ignore: [ include, lib ]
+ignore: []
 
 flags:
   error_flags: -Wall -Wunused-variable -Wextra -Wno-enum-compare -g -ggdb -fdiagnostics-color=always
   windows_lib_flags: -lgdi32 -lwinmm -static-libstdc++
   unix_lib_flags: -lm -lpthread -ldl -lrt -lX11
-  end_flags: -lyaml-cpp
+  end_flags:
 
 compiler_version: g++
 language_version: c++20

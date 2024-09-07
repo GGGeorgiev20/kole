@@ -1,18 +1,19 @@
 output: main
+extension: out
 
 directories:
-  src: src
+  src: src.basic
   obj: obj
   bin: bin
   include: include
 
-ignore: []
+ignore: [ obj ]
 
 flags:
   error_flags: -Wall -Wunused-variable -Wextra -Wno-enum-compare -g -ggdb -fdiagnostics-color=always
   windows_lib_flags: -lgdi32 -lwinmm -static-libstdc++
   unix_lib_flags: -lm -lpthread -ldl -lrt -lX11
-  end_flags:
+  end_flags: None
 
 compiler_version: g++
 language_version: c++20

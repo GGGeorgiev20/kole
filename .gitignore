@@ -1,9 +1,5 @@
-src
 obj
 bin
-lib
-include
-tests
 
-vscode
+.vscode
 __pycache__

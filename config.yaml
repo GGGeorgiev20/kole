@@ -2,18 +2,18 @@ output: main
 extension: out
 
 directories:
-  src: src.basic
+  src: [ src ] 
   obj: obj
   bin: bin
-  include: include
+  include: [ include ]
 
-ignore: [ obj ]
+ignore: []
 
 flags:
   error_flags: -Wall -Wunused-variable -Wextra -Wno-enum-compare -g -ggdb -fdiagnostics-color=always
-  windows_lib_flags: -lgdi32 -lwinmm -static-libstdc++
-  unix_lib_flags: -lm -lpthread -ldl -lrt -lX11
-  end_flags: None
+  windows_flags: -lgdi32 -lwinmm -static-libstdc++
+  unix_flags: -lm -lpthread -ldl -lrt -lX11
+  end_flags: -lyaml-cpp
 
 compiler_version: g++
 language_version: c++20

@@ -23,6 +23,7 @@ namespace ConfigReader
             if (config["directories"])
             {
                 const auto& dirs = config["directories"];
+                
                 for (const auto& dir : dirs)
                 {
                     std::string key = dir.first.as<std::string>();
@@ -33,7 +34,7 @@ namespace ConfigReader
                     }
                     else if (dir.second.IsScalar())
                     {
-                        buildConfig->directories[key] = dir.second.as<std::string>();
+                        buildConfig->directories[key] = { dir.second.as<std::string>() };
                     }
                 }
             }

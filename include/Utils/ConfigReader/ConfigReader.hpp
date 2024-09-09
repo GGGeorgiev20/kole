@@ -24,13 +24,12 @@ struct BuildConfig
         { "include",          { "include" } },
     };
 
-    std::vector<std::string> ignore;
+    std::vector<std::string> exclude;
 
     std::map<std::string, std::string> flags = {
         { "error_flags",      "" },
         { "windows_flags",    "" },
         { "unix_flags",       "" },
-        { "end_flags",        "" },
     };
 
     std::string compilerVersion = "g++";

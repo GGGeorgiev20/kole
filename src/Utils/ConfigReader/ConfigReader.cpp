@@ -39,12 +39,12 @@ namespace ConfigReader
                 }
             }
             
-            if (config["ignore"])
+            if (config["exclude"])
             {
-                const auto& ignores = config["ignore"];
-                for (const auto& ignore : ignores)
+                const auto& excluded= config["exclude"];
+                for (const auto& exclude : excluded)
                 {
-                    buildConfig->ignore.push_back(ignore.as<std::string>());
+                    buildConfig->exclude.push_back(exclude.as<std::string>());
                 }
             }
             

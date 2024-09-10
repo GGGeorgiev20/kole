@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <map>
 
 namespace Platform
 {
@@ -9,12 +10,17 @@ namespace Platform
     {
         WINDOWS,
         LINUX,
-        MAC,
+        MACOS,
         UNIX,
         UNKNOWN,
     };
-    
+
+    extern std::map<int, std::string> platformNames;
+
+    extern int savedPlatform;
     int GetPlatform();
 
     std::string GetOutputExtension();
+
+    std::string GetPlatformName(int platform);
 };

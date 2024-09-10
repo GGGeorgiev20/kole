@@ -31,7 +31,7 @@ void DirectoryManager::CreateDirectories()
             if (dirIsExcluded) continue;
             if (std::filesystem::exists(directoryPath)) continue;
 
-            const directory = fs::create_directory(directoryPath);
+            const bool directory = fs::create_directory(directoryPath);
             if (directory) {
                 Logger::Debug(fmt::format("Successfully created directory '{}'", key));
             }
@@ -51,17 +51,18 @@ void DirectoryManager::ClearObjectDirectory()
 {
     try
     {
-        const fs::path objPath = config->directories.at('obj');
-        const fs::directory_iterator objDir = objPath;
+        const fs::path objPath (config->directories.at("obj")[0]);
+        const fs::directory_iterator objDir (objPath);
         
         for (auto const& file : objDir)
         {
-            const filePath = file.path();
+            const fs::path filePath = file.path();
             fs::remove(filePath);
         }
     }
     catch (const std::exception& e)
     {
+        Logger::Error("Failed to clear object directory");
         std::cerr << e.what() << '\n';
     }
 }

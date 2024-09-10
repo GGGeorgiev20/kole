@@ -4,10 +4,10 @@ using namespace Logger;
 
 void Logger::Log(LogTypes::LogType type, std::string message)
 {
-    if (!LogTypes::LogTypeStatus[type] && type != LogTypes::LogType::Fatal)
+    if (!LogTypes::LogTypeStatuses[type] && type != LogTypes::LogType::Fatal)
         return;
 
-    printf("%s: %s\n", LogTypes::LogTypePrefix[type].c_str(), message.c_str());
+    printf("%s: %s\n", LogTypes::LogTypePrefixes[type].c_str(), message.c_str());
 }
 
 void Logger::Info(std::string message)

@@ -28,6 +28,8 @@ public:
 
     void PrintUnrecognizedArgument(std::string argument);
 
+    bool GetArgumentState(Argument argument);
+
 private:
     int argc;
     char** argv;
@@ -37,22 +39,22 @@ private:
     
     // Map of arguments and their possible identifiers (flags)
     const std::map<Argument, std::vector<std::string>> argumentIdentifiers = {
-        { Argument::Help,       { "-h", "--help" } },
-        { Argument::Clear,      { "--clear" } },
-        { Argument::Autorun,    { "--autorun" } },
+        { Argument::Help,         { "-h", "--help" } },
+        { Argument::Clear,        { "--clear" }      },
+        { Argument::Autorun,      { "--autorun" }    },
     };
 
     // Map of arguments and their descriptions
     const std::map<Argument, std::string> argumentDescriptions = {
-        { Argument::Help,       "Show this help message and exit" },
-        { Argument::Clear,      "Clear all object files before building" },
-        { Argument::Autorun,    "Autorun the compiled binary after building" },
+        { Argument::Help,         "Show this help message and exit"            },
+        { Argument::Clear,        "Clear all object files before building"     },
+        { Argument::Autorun,      "Autorun the compiled binary after building" },
     };
 
     // Map to track the state (whether the argument was provided or not)
-    std::map<Argument, bool> argumentFlags = {
-        { Argument::Help,       false },
-        { Argument::Clear,      false },
-        { Argument::Autorun,    false },
+    std::map<Argument, bool> argumentStates = {
+        { Argument::Help,         false },
+        { Argument::Clear,        false },
+        { Argument::Autorun,      false },
     };
 };

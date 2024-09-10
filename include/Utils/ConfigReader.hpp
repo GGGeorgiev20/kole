@@ -10,7 +10,7 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include "Utils/Platform/Platform.hpp"
+#include "Utils/Platform.hpp"
 
 struct BuildConfig
 {
@@ -27,15 +27,17 @@ struct BuildConfig
     std::vector<std::string> exclude;
 
     std::map<std::string, std::string> flags = {
-        { "error_flags",      "" },
-        { "windows_flags",    "" },
-        { "unix_flags",       "" },
+        { "common",       "" },
+        { "windows",      "" },
+        { "linux",        "" },
+        { "macos",        "" },
+        { "unix",         "" },
     };
 
     std::string compilerVersion = "g++";
     std::string languageVersion = "c++20";
 
-    std::string buildType = "debug";
+    std::string optimization = "debug";
 };
 
 namespace ConfigReader

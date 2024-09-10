@@ -9,6 +9,8 @@ ArgumentManager::ArgumentManager(int argc, char** argv)
 
 void ArgumentManager::ProcessArguments()
 {
+    // TODO: Save arguments passed after autorun and pass them to the executable when it's ran
+    
     // Skip the first argument, as it's the name of the executable
     for (int i = 1; i < argc; i++)
     {
@@ -22,7 +24,7 @@ void ArgumentManager::ProcessArguments()
             {
                 if (identifier == argument)
                 {
-                    argumentFlags[key] = true;
+                    argumentStates[key] = true;
                     argumentIsFound = true;
                     break;
                 }
@@ -120,4 +122,9 @@ void ArgumentManager::PrintUsage()
 void ArgumentManager::PrintUnrecognizedArgument(std::string argument)
 {
     printf("kole: error: unrecognized arguments: %s\n", argument.c_str());
+}
+
+bool ArgumentManager::GetArgumentState(Argument argument)
+{
+    return argumentStates.at(argument);
 }

@@ -12,7 +12,8 @@ enum class Argument
 {
     Help,
     Clear,
-    Autorun
+    Autorun,
+    Debug,
 };
 
 class ArgumentManager
@@ -42,6 +43,7 @@ private:
         { Argument::Help,         { "-h", "--help" } },
         { Argument::Clear,        { "--clear" }      },
         { Argument::Autorun,      { "--autorun" }    },
+        { Argument::Debug,        { "--debug" }      },
     };
 
     // Map of arguments and their descriptions
@@ -49,6 +51,7 @@ private:
         { Argument::Help,         "Show this help message and exit"            },
         { Argument::Clear,        "Clear all object files before building"     },
         { Argument::Autorun,      "Autorun the compiled binary after building" },
+        { Argument::Debug,        "Show logs used for debugging"               },
     };
 
     // Map to track the state (whether the argument was provided or not)
@@ -56,5 +59,6 @@ private:
         { Argument::Help,         false },
         { Argument::Clear,        false },
         { Argument::Autorun,      false },
+        { Argument::Debug,        false },
     };
 };

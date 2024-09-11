@@ -16,4 +16,6 @@ namespace LogTypes
 
     extern std::map<LogType, std::string> LogTypePrefixes;
     extern std::map<LogType, bool> LogTypeStatuses;
+
+    void EnableDebug();
 }

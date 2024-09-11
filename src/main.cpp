@@ -1,13 +1,17 @@
 #include "Core/ArgumentManager.hpp"
 #include "Core/DirectoryManager.hpp"
-#include "Core/FlagManager.hpp"
+#include "Core/FileCompiler.hpp"
 
 #include "Utils/ConfigReader.hpp"
+#include "Utils/Logger/LogTypes.hpp"
 
 int main(int argc, char** argv)
 {
     std::shared_ptr<ArgumentManager> argumentManager = std::make_shared<ArgumentManager>(argc, argv);
     argumentManager->ProcessArguments();
+
+    if (argumentManager->GetArgumentState(Argument::Debug))
+        LogTypes::EnableDebug();
 
     std::shared_ptr<BuildConfig> config = ConfigReader::GetBuildConfig();
     
@@ -17,6 +21,6 @@ int main(int argc, char** argv)
     if (argumentManager->GetArgumentState(Argument::Clear))
         directoryManager->ClearObjectDirectory();
     
-    std::shared_ptr<FlagManager> flagManager = std::make_shared<FlagManager>(config);
-    std::string flags = flagManager->GetFlags();
+    std::shared_ptr<FileCompiler> fileCompiler = std::make_shared<FileCompiler>(config);
+    fileCompiler->CompileObjectFiles();
 }

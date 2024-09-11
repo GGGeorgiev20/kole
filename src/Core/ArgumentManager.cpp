@@ -10,6 +10,7 @@ ArgumentManager::ArgumentManager(int argc, char** argv)
 void ArgumentManager::ProcessArguments()
 {
     // TODO: Save arguments passed after autorun and pass them to the executable when it's ran
+    // TODO: Add an argument which creates a config file it one doesn't exist
     
     // Skip the first argument, as it's the name of the executable
     for (int i = 1; i < argc; i++)

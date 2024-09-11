@@ -104,7 +104,7 @@ namespace ConfigReader
             if (config["optimization"])
                 buildConfig->optimization = config["optimization"].as<std::string>();
 
-            Logger::Info("Successfully read config file");
+            Logger::Debug("Successfully read config file");
         }
         catch (const YAML::Exception& e)
         {

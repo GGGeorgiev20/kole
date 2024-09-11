@@ -51,7 +51,7 @@ void DirectoryManager::ClearObjectDirectory()
 {
     try
     {
-        const fs::path objPath (config->directories.at("obj")[0]);
+        const fs::path objPath = config->directories.at("obj")[0];
         const fs::directory_iterator objDir (objPath);
         
         for (auto const& file : objDir)

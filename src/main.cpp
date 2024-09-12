@@ -14,6 +14,7 @@ int main(int argc, char** argv)
         LogTypes::EnableDebug();
 
     std::shared_ptr<BuildConfig> config = ConfigReader::GetBuildConfig();
+    ConfigReader::ValidateProperties();
     
     std::shared_ptr<DirectoryManager> directoryManager = std::make_shared<DirectoryManager>(config);
     directoryManager->CreateDirectories();
@@ -22,5 +23,7 @@ int main(int argc, char** argv)
         directoryManager->ClearObjectDirectory();
     
     std::shared_ptr<FileCompiler> fileCompiler = std::make_shared<FileCompiler>(config);
+
     fileCompiler->CompileObjectFiles();
+    fileCompiler->LinkObjectFiles();
 }

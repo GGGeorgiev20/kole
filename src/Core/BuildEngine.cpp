@@ -12,18 +12,19 @@ BuildEngine::BuildEngine(std::shared_ptr<BuildConfig> config)
     this->config = config;
 }
 
-std::string BuildEngine::GetCompileCommandForFile(std::string path, std::string name)
+std::string BuildEngine::GetCompileCommandForFile(std::string source, std::string object)
 {
     std::string flags = GetFlags();
     std::string includePaths = GetIncludePaths();
     
     std::string command = fmt::format(
-        "{} -std={} {} -c {} -o {} {}",
+        "{} {}{} {} -c {} -o {} {}",
         config->compilerVersion,
+        config->languageVersion != "" ? "-std=" : "",
         config->languageVersion,
         flags,
-        path,
-        fmt::format("{}/{}.o", config->directories.at("obj")[0], name),
+        source,
+        object,
         includePaths
     );
 
@@ -32,12 +33,36 @@ std::string BuildEngine::GetCompileCommandForFile(std::string path, std::string 
 
 std::string BuildEngine::GetLinkCommandForProject(std::vector<std::string> files)
 {
-    return files[0];
+    std::string flags = GetFlags();
+    std::string objectFiles = "";
+
+    std::string output = fmt::format(
+        "{}/{}{}{}",
+        config->directories.at("bin")[0],
+        config->output,
+        config->extension != "" ? "." : "",
+        config->extension
+    );
+
+    for (const auto& file : files)
+    {
+        objectFiles += fmt::format("{} ", file);
+    }
+    
+    std::string command = fmt::format(
+        "{} {} {} -o {}",
+        config->compilerVersion,
+        flags,
+        objectFiles,
+        output
+    );
+
+    return command;
 }
 
 std::string BuildEngine::GetFlags()
 {
-    if (flags != "") return flags;
+    if (!flags.empty()) return flags;
 
     int platform = Platform::GetPlatform();
 
@@ -45,31 +70,32 @@ std::string BuildEngine::GetFlags()
     transform(platformName.begin(), platformName.end(), platformName.begin(), ::tolower);
 
     std::string optimization = optimizationLevels.at("debug");
-    bool optimizationLevelIsValid = optimizationLevels.count(config->optimization) > 0;
 
-    if (!optimizationLevelIsValid)
+    std::string optimizationLowercase = config->optimization;
+    transform(optimizationLowercase.begin(), optimizationLowercase.end(), optimizationLowercase.begin(), ::tolower);
+    
+    if (optimizationLevels.count(optimizationLowercase) > 0)
     {
-        Logger::Warning(fmt::format("Optimization level '{}' not recognized", config->optimization));
-        Logger::Warning("Defaulting to debug optimization level");
+        optimization = optimizationLevels.at(optimizationLowercase);
+        Logger::Debug(fmt::format("Setting optimization level to '{}' ({})", optimizationLowercase, optimization));
     }
     else
     {
-        optimization = optimizationLevels.at(config->optimization);
-        Logger::Debug(fmt::format("Setting optimization level to '{}' ({})", config->optimization, optimization));
+        Logger::Warning(fmt::format("Optimization level '{}' not recognized", optimizationLowercase));
+        Logger::Warning("Defaulting to debug optimization level");
     }
 
     std::string commonFlags = config->flags.at("common");
     std::string platformSpecificFlags = config->flags.at(platformName);
 
-    std::string flags = fmt::format("{} {} {}", commonFlags, platformSpecificFlags, optimization);
-    this->flags = flags;
+    flags = fmt::format("{} {} {}", commonFlags, platformSpecificFlags, optimization);
 
     return flags;
 }
 
 std::string BuildEngine::GetIncludePaths()
 {
-    std::string includePaths = "";
+    if (!includePaths.empty()) return includePaths;
 
     for (const auto& includeDir : config->directories.at("include"))
     {

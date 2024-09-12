@@ -3,15 +3,6 @@
 
 #include <map>
 
-std::map<int, std::string> Platform::platformNames = {
-    { WINDOWS,      "Windows" },
-    { LINUX,        "Linux"   },
-    { MACOS,        "MacOS"   },
-    { UNIX,         "Unix"    },
-    { UNKNOWN,      "Unknown" },
-};
-
-int Platform::savedPlatform = -1;
 int Platform::GetPlatform()
 {
     if (savedPlatform != -1) return savedPlatform;
@@ -44,13 +35,13 @@ std::string Platform::GetOutputExtension()
     switch (platform)
     {
     case WINDOWS:
-        return ".exe";
+        return "exe";
     case LINUX:
-        return ".out";
+        return "out";
     case MACOS:
         return "";
     case UNIX:
-        return ".out";
+        return "out";
     default:
         return "";
     }
@@ -60,3 +51,15 @@ std::string Platform::GetPlatformName(int platform)
 {
     return platformNames.at(platform);
 }
+
+// Variables
+
+int Platform::savedPlatform = -1;
+
+std::map<int, std::string> Platform::platformNames = {
+    { WINDOWS,      "Windows" },
+    { LINUX,        "Linux"   },
+    { MACOS,        "MacOS"   },
+    { UNIX,         "Unix"    },
+    { UNKNOWN,      "Unknown" },
+};

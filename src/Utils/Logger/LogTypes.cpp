@@ -1,12 +1,11 @@
 #include "Utils/Logger/LogTypes.hpp"
 
-std::map<LogTypes::LogType, std::string> LogTypes::LogTypePrefixes = {
-    { LogType::Debug,     "DEBUG" },
-    { LogType::Info,      "INFO"  },
-    { LogType::Warning,   "WARN"  },
-    { LogType::Error,     "ERROR" },
-    { LogType::Fatal,     "FATAL" },
-};
+void LogTypes::EnableDebug()
+{
+    LogTypeStatuses[LogType::Debug] = true;
+}
+
+// Variables
 
 std::map<LogTypes::LogType, bool> LogTypes::LogTypeStatuses = {
     { LogType::Debug,     false },
@@ -15,7 +14,10 @@ std::map<LogTypes::LogType, bool> LogTypes::LogTypeStatuses = {
     { LogType::Error,     true  },
 };
 
-void LogTypes::EnableDebug()
-{
-    LogTypeStatuses[LogType::Debug] = true;
-}
+std::map<LogTypes::LogType, std::string> LogTypes::LogTypePrefixes = {
+    { LogType::Debug,     "DEBUG" },
+    { LogType::Info,      "INFO"  },
+    { LogType::Warning,   "WARN"  },
+    { LogType::Error,     "ERROR" },
+    { LogType::Fatal,     "FATAL" },
+};

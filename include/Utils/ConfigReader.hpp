@@ -7,6 +7,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <unordered_set>
 
 #include <yaml-cpp/yaml.h>
 
@@ -44,5 +45,17 @@ namespace ConfigReader
 {
     void ReadConfig();
 
+    void ValidateProperties();
+
+    std::string ProcessProperty(std::string property);
+
+    std::vector<std::string> ProcessProperty(std::vector<std::string> property);
+
     std::shared_ptr<BuildConfig> GetBuildConfig();
+
+    // Variables
+
+    extern std::string configPath;
+    extern std::shared_ptr<BuildConfig> buildConfig;
+    extern std::unordered_set<std::string> recognizedKeys;
 };

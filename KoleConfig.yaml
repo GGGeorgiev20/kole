@@ -1,8 +1,8 @@
-output: main
-extension: out
+output: none
+extension: none 
 
 directories:
-  src: [ src ] 
+  src: [ src ]
   obj: obj
   bin: bin
   include: [ include ]
@@ -13,8 +13,8 @@ flags:
   common: -Wall -Wunused-variable -Wextra -Wno-enum-compare -g -ggdb -fdiagnostics-color=always
   windows: -lgdi32 -lwinmm -static-libstdc++
   linux: -lm -lpthread -ldl -lrt -lX11 -lfmt -lyaml-cpp
-
+  
 compiler_version: g++
-language_version: c++20
+language_version: c++17
 
-optimization: debug
+optimization: Debug

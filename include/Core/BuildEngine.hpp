@@ -23,6 +23,7 @@ private:
     std::shared_ptr<BuildConfig> config;
 
     std::string flags = std::string();
+    std::string includePaths = std::string();
 
     std::map<std::string, std::string> optimizationLevels = {
         { "none",         "-O0"    },  // No optimization

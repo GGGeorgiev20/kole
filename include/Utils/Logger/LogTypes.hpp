@@ -14,8 +14,10 @@ namespace LogTypes
         Fatal,
     };
 
-    extern std::map<LogType, std::string> LogTypePrefixes;
-    extern std::map<LogType, bool> LogTypeStatuses;
-
     void EnableDebug();
+
+    // Variables
+
+    extern std::map<LogType, bool> LogTypeStatuses;
+    extern std::map<LogType, std::string> LogTypePrefixes;
 }

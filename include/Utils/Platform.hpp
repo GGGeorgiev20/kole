@@ -15,12 +15,14 @@ namespace Platform
         UNKNOWN,
     };
 
-    extern std::map<int, std::string> platformNames;
-
-    extern int savedPlatform;
     int GetPlatform();
 
     std::string GetOutputExtension();
 
     std::string GetPlatformName(int platform);
+
+    // Variables
+
+    extern int savedPlatform;
+    extern std::map<int, std::string> platformNames;
 };

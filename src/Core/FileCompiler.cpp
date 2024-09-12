@@ -17,6 +17,8 @@ void FileCompiler::CompileObjectFiles()
         
         for (const auto& entry : fs::recursive_directory_iterator(dirPath))
         {
+            // TODO: Don't compile files if the last modified timestamp of the source file is older than the creation date of its object file (if it exists)
+            
             // Only compile files, not directories
             if (fs::is_regular_file(entry.status()))
             {
@@ -25,11 +27,21 @@ void FileCompiler::CompileObjectFiles()
 
                 // Remove extension, leave only name
                 name = name.substr(0, name.find("."));
-                
+
+                std::string object = fmt::format("{}/{}.o", config->directories.at("obj")[0], name);
+
+                try
+                {
+                    std::string command = buildEngine->GetCompileCommandForFile(path, object);
+                    system(command.c_str());
+                }
+                catch (...)
+                {
+                    Logger::Fatal(fmt::format("Failed when compiling {}", path));
+                }
+
                 Logger::Info(fmt::format("Compiled {}", path));
-                
-                std::string command = buildEngine->GetCompileCommandForFile(path, name);
-                system(command.c_str());
+                objects.push_back(object);
             }
         }
     }
@@ -37,5 +49,15 @@ void FileCompiler::CompileObjectFiles()
 
 void FileCompiler::LinkObjectFiles()
 {
+    try
+    {
+        std::string command = buildEngine->GetLinkCommandForProject(objects);
+        system(command.c_str());
 
+        Logger::Info("Build successful");
+    }
+    catch (...)
+    {
+        Logger::Fatal("Failed when linking project");
+    }
 }

@@ -6,14 +6,12 @@
 #include <vector>
 #include <string>
 
-using ArgumentValue = std::variant<std::string, std::vector<std::string>>;
-
 enum class Argument
 {
     Help,
     Clear,
     Autorun,
-    Debug,
+    Debug
 };
 
 class ArgumentManager
@@ -37,7 +35,7 @@ private:
 
     const std::string description = "Build system for compiling and running C++ projects.";
     const Argument defaultHelpArgument = Argument::Help;
-    
+
     // Map of arguments and their possible identifiers (flags)
     const std::map<Argument, std::vector<std::string>> argumentIdentifiers = {
         { Argument::Help,         { "-h", "--help" } },

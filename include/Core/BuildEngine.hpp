@@ -9,11 +9,9 @@ class BuildEngine
 public:
     BuildEngine(std::shared_ptr<BuildConfig> config);
 
-    // TODO: Add comments to project
-
     std::string GetCompileCommandForFile(std::string path, std::string name);
 
-    std::string GetLinkCommandForProject(std::vector<std::string> files);
+    std::string GetLinkCommandForProject(std::vector<std::string> files, std::string output);
 
     std::string GetFlags();
 

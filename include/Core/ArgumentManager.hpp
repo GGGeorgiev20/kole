@@ -27,6 +27,8 @@ public:
 
     void PrintUnrecognizedArgument(std::string argument);
 
+    std::string GetArgumentForAutorun();
+
     bool GetArgumentState(Argument argument);
 
 private:
@@ -35,6 +37,8 @@ private:
 
     const std::string description = "Build system for compiling and running C++ projects.";
     const Argument defaultHelpArgument = Argument::Help;
+
+    std::string argumentsForAutorun = "";
 
     // Map of arguments and their possible identifiers (flags)
     const std::map<Argument, std::vector<std::string>> argumentIdentifiers = {

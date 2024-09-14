@@ -26,4 +26,7 @@ int main(int argc, char** argv)
 
     fileCompiler->CompileObjectFiles();
     fileCompiler->LinkObjectFiles();
+
+    if (argumentManager->GetArgumentState(Argument::Autorun))
+        fileCompiler->RunBinaryExecutable(argumentManager->GetArgumentForAutorun());
 }

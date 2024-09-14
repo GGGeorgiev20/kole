@@ -12,7 +12,7 @@ public:
     void CreateDirectories();
 
     void ClearObjectDirectory();
-    
+
 private:
     std::shared_ptr<BuildConfig> config;
 };

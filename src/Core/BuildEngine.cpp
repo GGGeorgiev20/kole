@@ -31,18 +31,10 @@ std::string BuildEngine::GetCompileCommandForFile(std::string source, std::strin
     return command;
 }
 
-std::string BuildEngine::GetLinkCommandForProject(std::vector<std::string> files)
+std::string BuildEngine::GetLinkCommandForProject(std::vector<std::string> files, std::string output)
 {
     std::string flags = GetFlags();
     std::string objectFiles = "";
-
-    std::string output = fmt::format(
-        "{}/{}{}{}",
-        config->directories.at("bin")[0],
-        config->output,
-        config->extension != "" ? "." : "",
-        config->extension
-    );
 
     for (const auto& file : files)
     {

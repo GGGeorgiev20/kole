@@ -49,6 +49,8 @@ void DirectoryManager::CreateDirectories()
 
 void DirectoryManager::ClearObjectDirectory()
 {
+    Logger::Debug("Clearing object directory");
+
     try
     {
         const fs::path objPath = config->directories.at("obj")[0];

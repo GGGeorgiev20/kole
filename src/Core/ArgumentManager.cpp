@@ -1,4 +1,7 @@
 #include "Core/ArgumentManager.hpp"
+#include "Utils/Logger/Logger.hpp"
+
+#include <fmt/core.h>
 #include <iomanip>
 
 ArgumentManager::ArgumentManager(int argc, char** argv)
@@ -9,15 +12,18 @@ ArgumentManager::ArgumentManager(int argc, char** argv)
 
 void ArgumentManager::ProcessArguments()
 {
-    // TODO: Save arguments passed after autorun and pass them to the executable when it's ran
-    // TODO: Add an argument which creates a config file it one doesn't exist
-    
     // Skip the first argument, as it's the name of the executable
     for (int i = 1; i < argc; i++)
     {
         char* argument = argv[i];
 
         bool argumentIsFound = false;
+
+        if (argumentStates.at(Argument::Autorun) == true)
+        {
+            argumentsForAutorun += fmt::format("{} ", argument);
+            continue;
+        }
         
         for (const auto& [key, value] : argumentIdentifiers)
         {
@@ -123,6 +129,16 @@ void ArgumentManager::PrintUsage()
 void ArgumentManager::PrintUnrecognizedArgument(std::string argument)
 {
     printf("kole: error: unrecognized arguments: %s\n", argument.c_str());
+}
+
+std::string ArgumentManager::GetArgumentForAutorun()
+{
+    if (argumentsForAutorun.empty())
+    {
+        Logger::Debug("No arguments for autorun were found. Returning empty");
+    }
+
+    return argumentsForAutorun;
 }
 
 bool ArgumentManager::GetArgumentState(Argument argument)

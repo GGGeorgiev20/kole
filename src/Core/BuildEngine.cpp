@@ -12,11 +12,21 @@ BuildEngine::BuildEngine(std::shared_ptr<BuildConfig> config)
     this->config = config;
 }
 
+/**
+ * @brief Generates the command to compile a source file to an object file.
+ *
+ * Constructs the compile command using the compiler version, language standard,
+ * flags, source file, object file, and include paths.
+ *
+ * @param source: The source file to compile.
+ * @param object: The object file output.
+ * @return The formatted compile command.
+ */
 std::string BuildEngine::GetCompileCommandForFile(std::string source, std::string object)
 {
     std::string flags = GetFlags();
     std::string includePaths = GetIncludePaths();
-    
+
     std::string command = fmt::format(
         "{} {}{} {} -c {} -o {} {}",
         config->compilerVersion,
@@ -31,6 +41,16 @@ std::string BuildEngine::GetCompileCommandForFile(std::string source, std::strin
     return command;
 }
 
+/**
+ * @brief Generates the command to link object files into a final binary.
+ *
+ * Constructs the link command using the compiler version, flags, object files,
+ * and output binary name.
+ *
+ * @param files: Vector of object files to link.
+ * @param output: The output binary name.
+ * @return The formatted link command.
+ */
 std::string BuildEngine::GetLinkCommandForProject(std::vector<std::string> files, std::string output)
 {
     std::string flags = GetFlags();
@@ -40,7 +60,7 @@ std::string BuildEngine::GetLinkCommandForProject(std::vector<std::string> files
     {
         objectFiles += fmt::format("{} ", file);
     }
-    
+
     std::string command = fmt::format(
         "{} {} {} -o {}",
         config->compilerVersion,
@@ -52,6 +72,14 @@ std::string BuildEngine::GetLinkCommandForProject(std::vector<std::string> files
     return command;
 }
 
+/**
+ * @brief Retrieves and caches the necessary compile flags.
+ *
+ * Gathers platform-specific and common flags, along with optimization levels,
+ * and caches them for future use.
+ *
+ * @return The formatted compile flags.
+ */
 std::string BuildEngine::GetFlags()
 {
     if (!flags.empty()) return flags;
@@ -65,7 +93,7 @@ std::string BuildEngine::GetFlags()
 
     std::string optimizationLowercase = config->optimization;
     transform(optimizationLowercase.begin(), optimizationLowercase.end(), optimizationLowercase.begin(), ::tolower);
-    
+
     if (optimizationLevels.count(optimizationLowercase) > 0)
     {
         optimization = optimizationLevels.at(optimizationLowercase);
@@ -85,6 +113,13 @@ std::string BuildEngine::GetFlags()
     return flags;
 }
 
+/**
+ * @brief Retrieves and caches the necessary include paths.
+ *
+ * Collects include directories from the configuration and caches them for future use.
+ *
+ * @return The formatted include paths.
+ */
 std::string BuildEngine::GetIncludePaths()
 {
     if (!includePaths.empty()) return includePaths;

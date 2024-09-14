@@ -1,4 +1,4 @@
-output: none
+output: kole
 extension: none 
 
 directories:
@@ -17,4 +17,4 @@ flags:
 compiler_version: g++
 language_version: c++17
 
-optimization: Debug
+optimization: release

@@ -16,6 +16,12 @@ std::unordered_set<std::string> ConfigReader::recognizedKeys = {
     "optimization"
 };
 
+/**
+ * @brief Reads the config and sets the config object.
+ *
+ * Checks if the config has any unrecognized properties and handles any errors in the config.
+ * If everything has gone right, read it and create a config object which is then cached in the ConfigReader class.
+ */
 void ConfigReader::ReadConfig()
 {
     try
@@ -36,6 +42,7 @@ void ConfigReader::ReadConfig()
         }
 
         // Check if the property is specified in the config before saving it
+        // Else, the default value in the config object is used
         if (config["output"])
         {
             std::string property = config["output"].as<std::string>();
@@ -56,6 +63,7 @@ void ConfigReader::ReadConfig()
             {
                 std::string key = dir.first.as<std::string>();
 
+                // If a directory isn't recognized in the config property, ignore it and warn the user
                 if (buildConfig->directories.count(key) == 0)
                 {
                     Logger::Warning(fmt::format("Directory '{}' was not recognized. Ignoring...", key));
@@ -129,6 +137,12 @@ void ConfigReader::ReadConfig()
     }
 }
 
+/**
+ * @brief Validates the values of properties.
+ *
+ * Certain properties in the config can't have empty values for example,
+ * so we want to handle these errors before they become a real problem.
+ */
 void ConfigReader::ValidateProperties()
 {
     if (buildConfig->output == "")
@@ -137,11 +151,24 @@ void ConfigReader::ValidateProperties()
     }
 }
 
+/**
+ * @brief Processes values of properties.
+ *
+ * Some properties can have empty values and except empty strings,
+ * "none" can also be passed to specify an empty value so we need to process these cases.
+ * It's also a useful function if we further in time need to add any processing to any properties.
+ *
+ * It's also overloaded, as certain properties contain an array instead of a simple string value.
+ *
+ * @param property: The raw value of the property.
+ *
+ * @return The processed value of the property.
+ */
 std::string ConfigReader::ProcessProperty(std::string property)
 {
     std::string propertyLowercase = property;
     transform(propertyLowercase.begin(), propertyLowercase.end(), propertyLowercase.begin(), ::tolower);
-    
+
     if (propertyLowercase == "none")
         return "";
 
@@ -167,6 +194,14 @@ std::vector<std::string> ConfigReader::ProcessProperty(std::vector<std::string> 
     return result;
 }
 
+/**
+ * @brief Returns a config object.
+ *
+ * Reads the config and returns a new config object if it's the first time reading it.
+ * Else return the cached config object.
+ *
+ * @return Either a new config or the cached config.
+ */
 std::shared_ptr<BuildConfig> ConfigReader::GetBuildConfig()
 {
     if (buildConfig == nullptr)

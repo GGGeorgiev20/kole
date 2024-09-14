@@ -3,12 +3,18 @@
 
 #include <map>
 
+/**
+ * @brief Get the platform of the user.
+ *
+ * Gets the platform of the user using macros.
+ * Also uses cache so that the message isn't printed every time a file is compiled.
+ */
 int Platform::GetPlatform()
 {
     if (savedPlatform != -1) return savedPlatform;
-    
+
     int platform;
-    
+
     #if defined(_WIN32) || defined(_WIN64)
         platform = WINDOWS;
     #elif defined(__linux__)
@@ -28,6 +34,9 @@ int Platform::GetPlatform()
     return platform;
 }
 
+/**
+ * @brief Get an extension suitable for the users' operating system.
+ */
 std::string Platform::GetOutputExtension()
 {
     int platform = GetPlatform();
@@ -47,6 +56,9 @@ std::string Platform::GetOutputExtension()
     }
 }
 
+/**
+ * @brief Get the name of the users' operating system.
+ */
 std::string Platform::GetPlatformName(int platform)
 {
     return platformNames.at(platform);

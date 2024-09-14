@@ -42,7 +42,7 @@ void Logger::Assert(std::string message, bool condition, bool isFatal)
     if (condition)
         return;
 
-    message = "ASSERT: " + message;
+    message = fmt::format("ASSERT: {}", message);
 
     if (isFatal)
         Fatal(message);

@@ -20,6 +20,5 @@ private:
     std::shared_ptr<BuildConfig> config;
     std::shared_ptr<BuildEngine> buildEngine;
 
-    std::vector<std::string> objects;
     std::string output;
 };

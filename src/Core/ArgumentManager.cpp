@@ -23,6 +23,7 @@ void ArgumentManager::ProcessArguments()
     for (int i = 1; i < argc; i++)
     {
         char* argument = argv[i];
+        Logger::Debug(fmt::format("Processing argument '{}'", argument));
 
         bool argumentIsFound = false;
 
@@ -48,6 +49,7 @@ void ArgumentManager::ProcessArguments()
             {
                 if (key == Argument::Help)
                 {
+                    Logger::Debug("Found help argument. Stopping and displaying help menu");
                     PrintHelp();
                     exit(0);
                 }

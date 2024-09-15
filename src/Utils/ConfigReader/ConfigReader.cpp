@@ -1,6 +1,11 @@
 #include "Utils/ConfigReader.hpp"
 #include "Utils/Logger/Logger.hpp"
 
+#include <fstream>
+#include <filesystem>
+
+namespace fs = std::filesystem;
+
 std::string ConfigReader::configPath = "./KoleConfig.yaml";
 std::shared_ptr<BuildConfig> ConfigReader::buildConfig = nullptr;
 
@@ -16,6 +21,34 @@ std::unordered_set<std::string> ConfigReader::recognizedKeys = {
     "optimization"
 };
 
+void ConfigReader::CreateConfig()
+{
+    if (fs::exists(configPath))
+    {
+        Logger::Warning("The config flag was specified but a config file already exists. Ignoring...");
+        return;
+    }
+
+    try
+    {
+        std::ofstream configFile(configPath);
+        if (!configFile.is_open())
+        {
+            Logger::Error(fmt::format("Failed to open config file at '{}'", configPath));
+            return;
+        }
+
+        configFile << defaultConfig;
+        configFile.close();
+
+        Logger::Info(fmt::format("Successfully created config file at '{}'", configPath));
+    }
+    catch (const std::exception& e)
+    {
+        Logger::Error(fmt::format("Error creating config file: {}", e.what()));
+    }
+}
+
 /**
  * @brief Reads the config and sets the config object.
  *
@@ -24,11 +57,16 @@ std::unordered_set<std::string> ConfigReader::recognizedKeys = {
  */
 void ConfigReader::ReadConfig()
 {
+    buildConfig = std::make_shared<BuildConfig>();
+    if (!std::filesystem::exists(configPath))
+    {
+        Logger::Info("Config file doesn't exist. Using default values");
+        return;
+    }
+
     try
     {
         YAML::Node config = YAML::LoadFile(configPath);
-
-        buildConfig = std::make_shared<BuildConfig>();
 
         // Check for unrecognized properties
         for (const auto& property : config)
@@ -128,7 +166,7 @@ void ConfigReader::ReadConfig()
             buildConfig->optimization = ProcessProperty(property);
         }
 
-        Logger::Debug("Successfully read config file");
+        Logger::Info("Successfully read config file");
     }
     catch (const YAML::Exception& e)
     {
@@ -148,6 +186,11 @@ void ConfigReader::ValidateProperties()
     if (buildConfig->output == "")
     {
         Logger::Fatal("Output name in config can't be empty");
+    }
+
+    if (buildConfig->extension == "auto")
+    {
+        buildConfig->extension = Platform::GetOutputExtension();
     }
 }
 

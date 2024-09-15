@@ -2,6 +2,7 @@
 #include "Utils/Logger/Logger.hpp"
 
 #include <algorithm>
+#include <fmt/core.h>
 
 namespace fs = std::filesystem;
 
@@ -25,6 +26,12 @@ void FileCompiler::CompileObjectFiles()
     for (const auto& dir : config->directories.at("src"))
     {
         const fs::path dirPath = dir;
+
+        if (fs::is_empty(dir))
+        {
+            Logger::Warning(fmt::format("Source directory '{}' is empty. No files to process, skipping...", dir));  
+            continue;
+        }
 
         for (const auto& entry : fs::recursive_directory_iterator(dirPath))
         {
@@ -65,7 +72,6 @@ void FileCompiler::CompileObjectFiles()
                 }
 
                 Logger::Info(fmt::format("Compiled {}", sourcePath));
-                objects.push_back(objectPath);
             }
         }
     }
@@ -76,6 +82,24 @@ void FileCompiler::CompileObjectFiles()
  */
 void FileCompiler::LinkObjectFiles()
 {
+    const fs::path objPath = config->directories.at("obj")[0];
+
+    if (fs::is_empty(objPath))
+    {
+        Logger::Warning("No object files were found, skipping linking phase...");
+        return;
+    }
+
+    std::vector<std::string> objects;
+
+    const fs::directory_iterator objDir (objPath);
+
+    for (auto const& file : objDir)
+    {
+        const std::string filePath = file.path().string();
+        objects.push_back(filePath);
+    }
+
     try
     {
         output = fmt::format(
@@ -108,7 +132,13 @@ void FileCompiler::LinkObjectFiles()
  */
 void FileCompiler::RunBinaryExecutable(std::string arguments)
 {
-    Logger::Assert("Binary executable wasn't found when trying to run it. Something has gone wrong", !output.empty())
+    Logger::Assert("Binary executable wasn't found when trying to run it. Something has gone wrong", !output.empty());
+
+    printf("\n");
+    if (arguments.empty())
+        Logger::Info("Executing compiled binary..");
+    else
+        Logger::Info(fmt::format("Executing binary with arguments: '{}'", arguments.substr(0, arguments.length() - 1)));
 
     std::string command = fmt::format("./{} {}", output, arguments);
 

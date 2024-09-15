@@ -16,7 +16,7 @@
 struct BuildConfig
 {
     std::string output = "main";
-    std::string extension = Platform::GetOutputExtension();
+    std::string extension = "auto";
 
     std::map<std::string, std::vector<std::string>> directories = {
         { "src",              {   "src"   } },
@@ -43,6 +43,8 @@ struct BuildConfig
 
 namespace ConfigReader
 {
+    void CreateConfig();
+
     void ReadConfig();
 
     void ValidateProperties();
@@ -58,4 +60,6 @@ namespace ConfigReader
     extern std::string configPath;
     extern std::shared_ptr<BuildConfig> buildConfig;
     extern std::unordered_set<std::string> recognizedKeys;
+
+    extern std::string defaultConfig;
 };

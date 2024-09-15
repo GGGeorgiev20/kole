@@ -11,7 +11,8 @@ enum class Argument
     Help,
     Clear,
     Autorun,
-    Debug
+    Debug,
+    Config
 };
 
 class ArgumentManager
@@ -46,14 +47,16 @@ private:
         { Argument::Clear,        { "--clear" }      },
         { Argument::Autorun,      { "--autorun" }    },
         { Argument::Debug,        { "--debug" }      },
+        { Argument::Config,       { "--config" }     },
     };
 
     // Map of arguments and their descriptions
     const std::map<Argument, std::string> argumentDescriptions = {
-        { Argument::Help,         "Show this help message and exit"            },
-        { Argument::Clear,        "Clear all object files before building"     },
-        { Argument::Autorun,      "Autorun the compiled binary after building" },
-        { Argument::Debug,        "Show logs used for debugging"               },
+        { Argument::Help,         "Show this help message and exit"              },
+        { Argument::Clear,        "Clear all object files before building"       },
+        { Argument::Autorun,      "Autorun the compiled binary after building"   },
+        { Argument::Debug,        "Show logs used for debugging"                 },
+        { Argument::Config,       "Create a default config if one doesn't exist" },
     };
 
     // Map to track the state (whether the argument was provided or not)
@@ -62,5 +65,6 @@ private:
         { Argument::Clear,        false },
         { Argument::Autorun,      false },
         { Argument::Debug,        false },
+        { Argument::Config,       false },
     };
 };

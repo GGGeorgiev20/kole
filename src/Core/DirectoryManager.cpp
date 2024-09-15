@@ -1,5 +1,6 @@
 #include "Core/DirectoryManager.hpp"
 #include "Utils/Logger/Logger.hpp"
+
 #include <filesystem>
 
 namespace fs = std::filesystem;
@@ -37,12 +38,11 @@ void DirectoryManager::CreateDirectories()
             if (std::filesystem::exists(directoryPath)) continue;
 
             const bool directory = fs::create_directory(directoryPath);
-            if (directory) {
-                Logger::Debug(fmt::format("Successfully created directory '{}'", key));
-            }
-            else {
+
+            if (directory)
+                Logger::Info(fmt::format("Created empty directory '{}'", key));
+            else
                 Logger::Error(fmt::format("Failed to create directory '{}'", key));
-            }
         }
         catch (const std::exception& e)
         {
@@ -57,18 +57,24 @@ void DirectoryManager::CreateDirectories()
  */
 void DirectoryManager::ClearObjectDirectory()
 {
-    Logger::Debug("Clearing object directory");
-
     try
     {
         const fs::path objPath = config->directories.at("obj")[0];
         const fs::directory_iterator objDir (objPath);
+
+        if (fs::is_empty(objPath))
+        {
+            Logger::Debug("Object directory is empty. Nothing to clear");
+            return;
+        }
 
         for (auto const& file : objDir)
         {
             const fs::path filePath = file.path();
             fs::remove(filePath);
         }
+
+        Logger::Info("Cleared object directory");
     }
     catch (const std::exception& e)
     {

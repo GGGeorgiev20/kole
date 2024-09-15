@@ -13,6 +13,9 @@ int main(int argc, char** argv)
     if (argumentManager->GetArgumentState(Argument::Debug))
         LogTypes::EnableDebug();
 
+    if (argumentManager->GetArgumentState(Argument::Config))
+        ConfigReader::CreateConfig();
+
     std::shared_ptr<BuildConfig> config = ConfigReader::GetBuildConfig();
     ConfigReader::ValidateProperties();
 

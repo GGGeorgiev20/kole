@@ -129,5 +129,10 @@ std::string BuildEngine::GetIncludePaths()
         includePaths += fmt::format("-I{} ", includeDir);
     }
 
+    // Remove trailing whitespace
+    includePaths = includePaths.substr(0, includePaths.length() - 1);
+
+    Logger::Debug(fmt::format("Include paths are '{}'", includePaths));
+
     return includePaths;
 }

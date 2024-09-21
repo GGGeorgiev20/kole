@@ -2,6 +2,27 @@
 #include "Utils/Logger/Logger.hpp"
 
 #include <map>
+#include <algorithm>
+
+void Platform::SetPlatform(std::string platformName)
+{
+    transform(platformName.begin(), platformName.end(), platformName.begin(), ::tolower);
+    Logger::Debug(fmt::format("Platform '{}' specified. Adjusting build settings.", platformName));
+
+    for (const auto& [key, value] : platformNames)
+    {
+        std::string mapPlatformName = value;
+        transform(mapPlatformName.begin(), mapPlatformName.end(), mapPlatformName.begin(), ::tolower);
+
+        if (platformName == mapPlatformName)
+        {
+            savedPlatform = key;
+            return;
+        }
+    }
+
+    Logger::Warning(fmt::format("Unrecognized platform '{}'. Defaulting to user's operating system: '{}'", platformName, Platform::GetPlatformName()));
+}
 
 /**
  * @brief Get the platform of the user.
@@ -30,7 +51,7 @@ int Platform::GetPlatform()
 
     savedPlatform = platform;
 
-    Logger::Debug(fmt::format("Operating system is {}", GetPlatformName(platform)));
+    Logger::Debug(fmt::format("Operating system is {}", GetPlatformName()));
     return platform;
 }
 
@@ -39,7 +60,7 @@ int Platform::GetPlatform()
  */
 std::string Platform::GetOutputExtension()
 {
-    int platform = GetPlatform();
+    const int platform = GetPlatform();
 
     switch (platform)
     {
@@ -59,8 +80,9 @@ std::string Platform::GetOutputExtension()
 /**
  * @brief Get the name of the users' operating system.
  */
-std::string Platform::GetPlatformName(int platform)
+std::string Platform::GetPlatformName()
 {
+    const int platform = GetPlatform();
     return platformNames.at(platform);
 }
 

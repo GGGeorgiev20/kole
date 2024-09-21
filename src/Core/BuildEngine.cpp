@@ -20,6 +20,7 @@ BuildEngine::BuildEngine(std::shared_ptr<BuildConfig> config)
  *
  * @param source: The source file to compile.
  * @param object: The object file output.
+ *
  * @return The formatted compile command.
  */
 std::string BuildEngine::GetCompileCommandForFile(std::string source, std::string object)
@@ -49,6 +50,7 @@ std::string BuildEngine::GetCompileCommandForFile(std::string source, std::strin
  *
  * @param files: Vector of object files to link.
  * @param output: The output binary name.
+ *
  * @return The formatted link command.
  */
 std::string BuildEngine::GetLinkCommandForProject(std::vector<std::string> files, std::string output)
@@ -62,11 +64,11 @@ std::string BuildEngine::GetLinkCommandForProject(std::vector<std::string> files
     }
 
     std::string command = fmt::format(
-        "{} {} {} -o {}",
+        "{} {} -o {} {}",
         config->compilerVersion,
-        flags,
         objectFiles,
-        output
+        output,
+        flags
     );
 
     return command;
@@ -84,9 +86,7 @@ std::string BuildEngine::GetFlags()
 {
     if (!flags.empty()) return flags;
 
-    int platform = Platform::GetPlatform();
-
-    std::string platformName = Platform::GetPlatformName(platform);
+    std::string platformName = Platform::GetPlatformName();
     transform(platformName.begin(), platformName.end(), platformName.begin(), ::tolower);
 
     std::string optimization = optimizationLevels.at("debug");
@@ -108,7 +108,7 @@ std::string BuildEngine::GetFlags()
     std::string commonFlags = config->flags.at("common");
     std::string platformSpecificFlags = config->flags.at(platformName);
 
-    flags = fmt::format("{} {} {}", commonFlags, platformSpecificFlags, optimization);
+    flags = fmt::format("{} {} {}", optimization, commonFlags, platformSpecificFlags);
 
     return flags;
 }

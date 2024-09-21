@@ -1,6 +1,8 @@
 output: kole
 extension: none
 
+platform: auto
+
 directories:
   src: [ src ]
   obj: obj
@@ -11,7 +13,7 @@ exclude: []
 
 flags:
   common: -Wall -Wunused-variable -Wextra -Wno-enum-compare -g -ggdb -fdiagnostics-color=always
-  windows: -lgdi32 -lwinmm -static-libstdc++
+  windows: -lgdi32 -lwinmm -static-libstdc++ -lfmt -lyaml-cpp
   linux: -lm -lpthread -ldl -lrt -lX11 -lfmt -lyaml-cpp
 
 compiler_version: g++

@@ -74,7 +74,7 @@ void DirectoryManager::ClearObjectDirectory()
             fs::remove(filePath);
         }
 
-        Logger::Info("Cleared object directory");
+        Logger::Debug("Cleared object directory");
     }
     catch (const std::exception& e)
     {

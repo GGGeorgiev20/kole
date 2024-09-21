@@ -13,6 +13,7 @@ std::shared_ptr<BuildConfig> ConfigReader::buildConfig = nullptr;
 std::unordered_set<std::string> ConfigReader::recognizedKeys = {
     "output",
     "extension",
+    "platform",
     "directories",
     "exclude",
     "flags",
@@ -91,6 +92,12 @@ void ConfigReader::ReadConfig()
         {
             std::string property = config["extension"].as<std::string>();
             buildConfig->extension = ProcessProperty(property);
+        }
+
+        if (config["platform"])
+        {
+            std::string property = config["platform"].as<std::string>();
+            buildConfig->platform = ProcessProperty(property);
         }
 
         if (config["directories"])
@@ -180,8 +187,11 @@ void ConfigReader::ReadConfig()
  *
  * Certain properties in the config can't have empty values for example,
  * so we want to handle these errors before they become a real problem.
+ *
+ * This function also acts as a post-process, so properties that can
+ * take the 'auto' value are calculated here.
  */
-void ConfigReader::ValidateProperties()
+void ConfigReader::PostProcess()
 {
     if (buildConfig->output == "")
     {
@@ -191,6 +201,15 @@ void ConfigReader::ValidateProperties()
     if (buildConfig->extension == "auto")
     {
         buildConfig->extension = Platform::GetOutputExtension();
+    }
+
+    if (buildConfig->platform == "auto")
+    {
+        buildConfig->platform = Platform::GetPlatform();
+    }
+    else
+    {
+        Platform::SetPlatform(buildConfig->platform);
     }
 }
 

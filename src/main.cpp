@@ -17,7 +17,7 @@ int main(int argc, char** argv)
         ConfigReader::CreateConfig();
 
     std::shared_ptr<BuildConfig> config = ConfigReader::GetBuildConfig();
-    ConfigReader::ValidateProperties();
+    ConfigReader::PostProcess();
 
     std::shared_ptr<DirectoryManager> directoryManager = std::make_shared<DirectoryManager>(config);
     directoryManager->CreateDirectories();

@@ -15,11 +15,13 @@ namespace Platform
         UNKNOWN,
     };
 
+    void SetPlatform(std::string platformName);
+
     int GetPlatform();
 
     std::string GetOutputExtension();
 
-    std::string GetPlatformName(int platform);
+    std::string GetPlatformName();
 
     // Variables
 

@@ -61,15 +61,19 @@ void FileCompiler::CompileObjectFiles()
                     }
                 }
 
-                try
-                {
-                    std::string command = buildEngine->GetCompileCommandForFile(sourcePath, objectPath);
-                    system(command.c_str());
-                }
-                catch (...)
-                {
-                    Logger::Fatal(fmt::format("Failed when compiling {}", sourcePath));
-                }
+                        try
+                        {
+                            std::string command = buildEngine->GetCompileCommandForFile(sourcePath, objectPath);
+                            const int exitStatus = system(command.c_str());
+
+                            if (exitStatus != 0)
+                                throw (command);
+                        }
+                        catch (std::string command)
+                        {
+                            Logger::Error(fmt::format("Failed when compiling {}", sourcePath));
+                            Logger::Fatal(fmt::format("Command: ", command));
+                        }
 
                 Logger::Info(fmt::format("Compiled {}", sourcePath));
             }
@@ -100,25 +104,29 @@ void FileCompiler::LinkObjectFiles()
         objects.push_back(filePath);
     }
 
-    try
-    {
-        output = fmt::format(
-            "{}/{}{}{}",
-            config->directories.at("bin")[0],
-            config->output,
-            config->extension != "" ? "." : "",
-            config->extension
-        );
+            try
+            {
+                output = fmt::format(
+                    "{}/{}{}{}",
+                    config->directories.at("bin")[0],
+                    config->output,
+                    config->extension != "" ? "." : "",
+                    config->extension
+                );
 
-        std::string command = buildEngine->GetLinkCommandForProject(objects, output);
-        system(command.c_str());
+                std::string command = buildEngine->GetLinkCommandForProject(objects, output);
+                const int exitStatus = system(command.c_str());
 
-        Logger::Info("Build successful");
-    }
-    catch (...)
-    {
-        Logger::Fatal("Failed when linking project");
-    }
+                if (exitStatus != 0)
+                    throw (command);
+
+                Logger::Info("Build successful");
+            }
+            catch (std::string command)
+            {
+                Logger::Error("Failed when linking project");
+                Logger::Fatal(fmt::format("Command: {}", command));
+            }
 }
 
 /**

@@ -18,6 +18,8 @@ struct BuildConfig
     std::string output = "main";
     std::string extension = "auto";
 
+    std::string platform = "auto";
+
     std::map<std::string, std::vector<std::string>> directories = {
         { "src",              {   "src"   } },
         { "obj",              {   "obj"   } },
@@ -47,7 +49,7 @@ namespace ConfigReader
 
     void ReadConfig();
 
-    void ValidateProperties();
+    void PostProcess();
 
     std::string ProcessProperty(std::string property);
 

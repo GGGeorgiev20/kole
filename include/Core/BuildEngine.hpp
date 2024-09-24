@@ -9,9 +9,15 @@ class BuildEngine
 public:
     BuildEngine(std::shared_ptr<BuildConfig> config);
 
-    std::string GetCompileCommandForFile(std::string path, std::string name);
+    std::string GetCompileCommandForFile(std::string sourcePath, std::string sourceFileName, std::string sourceExtension);
 
     std::string GetLinkCommandForProject(std::vector<std::string> files, std::string output);
+
+    std::string GetCompileCommandForSourceFile(std::string source, std::string output);
+
+    std::string GetCompileCommandForHeaderFile(std::string source, std::string output);
+
+    std::string GetCompileCommandForUIFile(std::string source, std::string output);
 
     std::string GetFlags();
 

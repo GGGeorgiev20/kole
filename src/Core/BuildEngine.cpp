@@ -6,40 +6,81 @@
 #include <map>
 #include <algorithm>
 #include <fmt/core.h>
+#include <filesystem>
+#include <functional>
+
+namespace fs = std::filesystem;
 
 BuildEngine::BuildEngine(std::shared_ptr<BuildConfig> config)
 {
     this->config = config;
 }
 
-/**
- * @brief Generates the command to compile a source file to an object file.
- *
- * Constructs the compile command using the compiler version, language standard,
- * flags, source file, object file, and include paths.
- *
- * @param source: The source file to compile.
- * @param object: The object file output.
- *
- * @return The formatted compile command.
- */
-std::string BuildEngine::GetCompileCommandForFile(std::string source, std::string object)
+std::string BuildEngine::GetCompileCommandForFile(std::string sourcePath, std::string sourceFileName, std::string sourceExtension)
 {
-    std::string flags = GetFlags();
-    std::string includePaths = GetIncludePaths();
+    std::string outputExtension;
+    std::string outputDirectory;
 
-    std::string command = fmt::format(
-        "{} {}{} {} -c {} -o {} {}",
-        config->compilerVersion,
-        config->languageVersion != "" ? "-std=" : "",
-        config->languageVersion,
-        flags,
-        source,
-        object,
-        includePaths
+    // Determine output extension and directory based on source file extension
+    if (sourceExtension == "cpp")
+    {
+        outputExtension = "o";
+        outputDirectory = "obj";
+    }
+    else if (sourceExtension == "h" || sourceExtension == "hpp")
+    {
+        outputExtension = "cpp";
+        outputDirectory = "obj";
+        sourceFileName = config->qtSupport.at("moc_prefix") + sourceFileName;
+    }
+    else if (sourceExtension == "ui")
+    {
+        outputExtension = config->qtSupport.at("ui_extension");
+        outputDirectory = config->qtSupport.at("ui_output_dir");
+        sourceFileName = config->qtSupport.at("ui_prefix") + sourceFileName;
+    }
+    else
+    {
+        Logger::Warning(fmt::format("Unsupported file extension: {}", sourceExtension));
+        return "";
+    }
+
+    std::string outputPath = fmt::format(
+        "./{}/{}.{}",
+        outputDirectory,
+        sourceFileName,
+        outputExtension
     );
 
-    return command;
+    const fs::path outputFile = outputPath;
+
+    if (fs::exists(outputFile))
+    {
+        auto sourceLastModified = fs::last_write_time(sourcePath);
+        auto outputLastModified = fs::last_write_time(outputFile);
+
+        // Skip compilation if the source file is older than the object file (up-to-date)
+        if (sourceLastModified <= outputLastModified)
+        {
+            Logger::Debug(fmt::format("Skipping {} (up to date)", sourcePath));
+            return "";
+        }
+    }
+
+    if (sourceExtension == "cpp")
+    {
+        return GetCompileCommandForSourceFile(sourcePath, outputPath);
+    }
+    else if (sourceExtension == "h" || sourceExtension == "hpp")
+    {
+        return GetCompileCommandForHeaderFile(sourcePath, outputPath);
+    }
+    else if (sourceExtension == "ui")
+    {
+        return GetCompileCommandForUIFile(sourcePath, outputPath);
+    }
+
+    return "";
 }
 
 /**
@@ -63,12 +104,72 @@ std::string BuildEngine::GetLinkCommandForProject(std::vector<std::string> files
         objectFiles += fmt::format("{} ", file);
     }
 
+    objectFiles = objectFiles.substr(0, objectFiles.length() - 1);
+
     std::string command = fmt::format(
         "{} {} -o {} {}",
         config->compilerVersion,
         objectFiles,
         output,
         flags
+    );
+
+    return command;
+}
+
+/**
+ * @brief Generates the command to compile a source file to an object file.
+ *
+ * Constructs the compile command using the compiler version, language standard,
+ * flags, source file, object file, and include paths.
+ *
+ * @param source: The source file to compile.
+ * @param object: The object file output.
+ *
+ * @return The formatted compile command.
+ */
+std::string BuildEngine::GetCompileCommandForSourceFile(std::string source, std::string output)
+{
+    std::string flags = GetFlags();
+    std::string includePaths = GetIncludePaths();
+
+    std::string command = fmt::format(
+        "{} {}{} -c {} -o {} {} {}",
+        config->compilerVersion,
+        config->languageVersion != "" ? "-std=" : "",
+        config->languageVersion,
+        source,
+        output,
+        includePaths,
+        flags
+    );
+
+    return command;
+}
+
+std::string BuildEngine::GetCompileCommandForHeaderFile(std::string source, std::string output)
+{
+    std::string command = fmt::format(
+        "moc {} -o {} >/dev/null 2>&1",
+        source,
+        output
+    );
+
+    // NOTE: The reason this specific flag is passed to the moc command
+    // is to remove the message if a certain header file doesn't need to be compiled.
+    // Personally, I fucking love that feature as it saved a lot of trouble
+    // but I don't like the message (it's great for debugging purposes),
+    // but I don't want it in the build system
+
+    return command;
+}
+
+std::string BuildEngine::GetCompileCommandForUIFile(std::string source, std::string output)
+{
+    std::string command = fmt::format(
+        "uic {} -o {}",
+        source,
+        output
     );
 
     return command;
@@ -128,6 +229,9 @@ std::string BuildEngine::GetIncludePaths()
     {
         includePaths += fmt::format("-I{} ", includeDir);
     }
+
+    if (config->qtSupport.at("compile_ui") == "true")
+        includePaths += fmt::format("-I{} ", config->qtSupport.at("ui_output_dir"));
 
     // Remove trailing whitespace
     includePaths = includePaths.substr(0, includePaths.length() - 1);

@@ -165,12 +165,16 @@ void ArgumentManager::PrintUnrecognizedArgument(std::string argument)
  */
 std::string ArgumentManager::GetArgumentForAutorun()
 {
-    if (argumentsForAutorun.empty())
+    if (this->argumentsForAutorun.empty())
     {
-        Logger::Debug("No arguments for autorun were found. Returning empty");
+        Logger::Debug("No arguments for autorun were found");
+    }
+    else
+    {
+        Logger::Debug(fmt::format("Arguments for binary execution: [{}]", this->argumentsForAutorun));
     }
 
-    return argumentsForAutorun;
+    return this->argumentsForAutorun;
 }
 
 /**

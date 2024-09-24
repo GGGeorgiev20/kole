@@ -17,6 +17,7 @@ std::unordered_set<std::string> ConfigReader::recognizedKeys = {
     "directories",
     "exclude",
     "flags",
+    "qt_support",
     "compiler_version",
     "language_version",
     "optimization"
@@ -155,6 +156,22 @@ void ConfigReader::ReadConfig()
             }
         }
 
+        if (config["qt_support"])
+        {
+            const auto& qtSupport = config["qt_support"];
+
+            for (const auto& property : qtSupport)
+            {
+                std::string key = property.first.as<std::string>();
+                std::string value = property.second.as<std::string>();
+
+                if (buildConfig->qtSupport.count(key) > 0)
+                    buildConfig->qtSupport[key] = ProcessProperty(value);
+                else
+                    Logger::Warning(fmt::format("QT Support property '{}' was not recognized. Ignoring...", key));
+            }
+        }
+
         if (config["compiler_version"])
         {
             std::string property = config["compiler_version"].as<std::string>();
@@ -210,6 +227,12 @@ void ConfigReader::PostProcess()
     else
     {
         Platform::SetPlatform(buildConfig->platform);
+    }
+
+    const std::string uiExtension = buildConfig->qtSupport.at("ui_extension");
+    if (uiExtension != "hpp" && uiExtension != "h")
+    {
+        Logger::Warning(fmt::format("UI extension '{}' is not valid and may cause issues.", uiExtension));
     }
 }
 

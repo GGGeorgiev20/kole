@@ -11,6 +11,8 @@ public:
 
     void CreateDirectories();
 
+    void CreateDirectory(std::string directory);
+
     void ClearObjectDirectory();
 
 private:

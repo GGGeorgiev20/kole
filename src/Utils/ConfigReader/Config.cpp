@@ -16,12 +16,6 @@ flags:
   windows: none
   linux: none
 
-qt_support:
-  compile_ui: true
-  compile_moc: true
-  ui_prefix: "ui_"
-
-compiler_version: g++
 language_version: c++17
 
 optimization: debug

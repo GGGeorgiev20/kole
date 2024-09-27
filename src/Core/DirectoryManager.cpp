@@ -17,38 +17,47 @@ DirectoryManager::DirectoryManager(std::shared_ptr<BuildConfig> config)
  */
 void DirectoryManager::CreateDirectories()
 {
-    for (const auto& [key, value] : config->directories)
+    for (const auto& [directoryKey, directories] : config->directories)
     {
         bool dirIsExcluded = false;
 
-        for (const auto& dir : config->exclude)
+        for (const auto& directory : config->exclude)
         {
-            if (key == dir)
+            if (directoryKey == directory)
             {
                 dirIsExcluded = true;
                 break;
             }
         }
 
-        try
+        if (dirIsExcluded) continue;
+
+        for (const auto& directory : directories)
         {
-            const std::filesystem::path directoryPath = key;
-
-            if (dirIsExcluded) continue;
-            if (std::filesystem::exists(directoryPath)) continue;
-
-            const bool directory = fs::create_directory(directoryPath);
-
-            if (directory)
-                Logger::Info(fmt::format("Created empty directory '{}'", key));
-            else
-                Logger::Error(fmt::format("Failed to create directory '{}'", key));
+            CreateDirectory(directory);
         }
-        catch (const std::exception& e)
-        {
-            Logger::Error(fmt::format("Failed to create directory '{}'", key));
-            std::cerr << e.what() << '\n';
-        }
+    }
+}
+
+void DirectoryManager::CreateDirectory(std::string directory)
+{
+    if (directory.empty()) return;
+
+    try
+    {
+        const fs::path directoryPath = directory;
+
+        if (fs::exists(directoryPath)) return;
+
+        if (fs::create_directory(directoryPath))
+            Logger::Info(fmt::format("Created empty directory '{}'", directory));
+        else
+            Logger::Error(fmt::format("Failed to create directory '{}'", directory));
+    }
+    catch (const std::exception& e)
+    {
+        Logger::Error(fmt::format("Failed to create directory '{}'", directory));
+        std::cerr << e.what() << '\n';
     }
 }
 

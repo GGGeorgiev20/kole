@@ -229,8 +229,9 @@ void ConfigReader::PostProcess()
         Platform::SetPlatform(buildConfig->platform);
     }
 
+    const std::string compileUi = buildConfig->qtSupport.at("compile_ui");
     const std::string uiExtension = buildConfig->qtSupport.at("ui_extension");
-    if (uiExtension != "hpp" && uiExtension != "h")
+    if (compileUi == "true" && uiExtension != "hpp" && uiExtension != "h")
     {
         Logger::Warning(fmt::format("UI extension '{}' is not valid and may cause issues.", uiExtension));
     }

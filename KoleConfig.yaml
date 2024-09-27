@@ -4,26 +4,17 @@ extension: none
 platform: auto
 
 directories:
-  src: [ src.qt ]
-  ui: [ ui ]
+  src: [ src ]
   obj: obj
   bin: bin
-  include: [ include.qt ]
+  include: [ include ]
 
 exclude: []
 
 flags:
   common: -Wall -Wunused-variable -Wextra -Wno-enum-compare -g -ggdb -fdiagnostics-color=always
-  windows: -lgdi32 -lwinmm -static-libstdc++
-  linux: -lm -lpthread -ldl -lrt -lX11 `pkg-config --cflags --libs Qt5Widgets`
-
-qt_support:
-  compile_ui: true
-  compile_moc: true
-  ui_prefix: ui_
-  ui_extension: hpp
-  ui_output_dir: ui
-  moc_prefix: moc_
+  windows: -lgdi32 -lwinmm -static-libstdc++ -lfmt -lyaml-cpp
+  linux: -lm -lpthread -ldl -lrt -lX11 -lfmt -lyaml-cpp
 
 compiler_version: g++
 language_version: c++17

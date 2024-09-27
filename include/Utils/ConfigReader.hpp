@@ -22,7 +22,7 @@ struct BuildConfig
 
     std::map<std::string, std::vector<std::string>> directories = {
         { "src",              {   "src"   } },
-        { "ui",               {   "ui"    } },
+        { "ui",               {    ""     } },
         { "obj",              {   "obj"   } },
         { "bin",              {   "bin"   } },
         { "include",          { "include" } },
@@ -52,7 +52,7 @@ struct BuildConfig
     };
 
     std::string compilerVersion = "g++";
-    std::string languageVersion = "c++20";
+    std::string languageVersion = "c++17";
 
     std::string optimization = "debug";
 };

@@ -8,12 +8,37 @@ class FileCompiler
 public:
     FileCompiler(std::shared_ptr<BuildConfig> config);
 
+    /**
+     * @brief Adds relevant directories to an array for compilation.
+     *
+     * E.g. [ src ] -> [ ui, src ] if UI compilation is enabled,
+     * [ src ] -> [ include, src ] if header compilation is enabled.
+     */
     void SetupDirectories();
 
+    /**
+     * @brief Compiles source files to object files.
+     *
+     * Iterates through configured directories (e.g., 'src') and compiles source
+     * files into object files. Includes UI and header files if Qt support is enabled.
+     */
     void CompileObjectFiles();
 
+    /**
+     * @brief Links object files into a binary executable.
+     *
+     * Links compiled object files into an executable binary, applying platform-specific
+     * flags. Saves the output path for optional execution.
+     */
     void LinkObjectFiles();
 
+    /**
+     * @brief Runs the compiled binary executable with optional arguments.
+     *
+     * Adjusts path separators for compatibility with the target platform (Linux/Windows).
+     *
+     * @param arguments Arguments to pass to the executable.
+     */
     void RunBinaryExecutable(std::string arguments);
 
 private:
@@ -22,9 +47,8 @@ private:
 
     // NOTE: Usually, only files in the src directories are compiled
     // But if the user is using qt, ui and header files also need to be compiled
-    // So instead of checking 3 different arrays of directories, I just add
-    // the ui and include directories to the src directories if
-    // compiling ui or compiling headers are enabled accordingly
+    // So instead of checking 3 different arrays of directories,
+    // just add the ui, include and src directories to one array
     std::vector<std::string> directoriesForCompilation;
 
     // NOTE: The output of the LinkObjectFiles is saved

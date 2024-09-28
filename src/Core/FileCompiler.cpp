@@ -15,14 +15,6 @@ FileCompiler::FileCompiler(std::shared_ptr<BuildConfig> config)
     this->SetupDirectories();
 }
 
-/**
- * @brief Moves directories which need to be compiled (except src) to the src directories list
- *
- *  E.g. [ src ] -> [ ui, src ]          if ui compilation is enabled
- *  E.g. [ src ] -> [ include, src ]     if header compilation is enabled
- *
- *  E.g [ include ] -> [ include, ui ]
- */
 void FileCompiler::SetupDirectories()
 {
     std::vector<std::string> tempDirs;
@@ -30,11 +22,13 @@ void FileCompiler::SetupDirectories()
     // Add directories from config to tempDirs
     auto AddDirsFromConfig = [&](const std::vector<std::string>& dirs)
     {
+        if (dirs.empty()) return;
+
         tempDirs.insert(tempDirs.end(), dirs.begin(), dirs.end());
     };
 
-    // UI and headerds need to be added to the array first so that they're also
-    // compiled first. This is because they're the files that are included
+    // UI and headers need to be added to the array first so that they're also
+    // compiled first. This is because these files need to be included
     // and so source files won't compile without them.
 
     // I know this is fucking awful. For details, please check ConfigReader.hpp
@@ -60,15 +54,6 @@ void FileCompiler::SetupDirectories()
     }
 }
 
-/**
- * @brief Compiles files in every directories specified in the 'src' property of the config to object files.
- *
- * Iterate through every directory in the 'src' property and every file and subdirectory in it and compile them to object files.
- * By default, if the object file is modified earlier than the last time its source file has been modified, skip recompiling it.
- * (The object directory can be cleared using the 'clear' flag)
- *
- * Every object file is saved in the 'objects' array for linking after that.
- */
 void FileCompiler::CompileObjectFiles()
 {
     for (const auto& dir : directoriesForCompilation)
@@ -114,9 +99,6 @@ void FileCompiler::CompileObjectFiles()
     }
 }
 
-/**
- * @brief Link saved object files to a binary executable.
- */
 void FileCompiler::LinkObjectFiles()
 {
     const fs::path objPath = config->directories.at("obj")[0];
@@ -163,22 +145,13 @@ void FileCompiler::LinkObjectFiles()
     Logger::Info("Build successful");
 }
 
-/**
- * @brief Run the compiled binary executable with arguments.
- *
- * Executes the compiled binary.
- * On Linux, paths use '/' while on Windows, paths use '\'.
- * Adjust accordingly for compatibility.
- *
- * @param arguments: Arguments to pass to the executable.
- */
 void FileCompiler::RunBinaryExecutable(std::string arguments)
 {
     Logger::Assert("Binary executable wasn't found when trying to run it. Something has gone wrong", !output.empty());
 
     printf("\n");
     if (arguments.empty())
-        Logger::Info("Executing compiled binary..");
+        Logger::Info("Executing compiled binary...");
     else
         Logger::Info(fmt::format("Executing binary with arguments: '{}'", arguments.substr(0, arguments.length() - 1)));
 

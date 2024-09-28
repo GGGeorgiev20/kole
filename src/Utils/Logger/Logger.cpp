@@ -4,6 +4,7 @@ using namespace Logger;
 
 void Logger::Log(LogTypes::LogType type, std::string message)
 {
+    // Fatal can't be stopped from logging
     if (!LogTypes::LogTypeStatuses[type] && type != LogTypes::LogType::Fatal)
         return;
 
@@ -37,15 +38,20 @@ void Logger::Fatal(std::string message)
     exit(1);
 }
 
+void Logger::AssertLog(std::string message)
+{
+    Log(LogTypes::LogType::Assert, message);
+    Log(LogTypes::LogType::Assert, "Exiting program...");
+    exit(1);
+}
+
 void Logger::Assert(std::string message, bool condition, bool isFatal)
 {
     if (condition)
         return;
 
-    message = fmt::format("ASSERT: {}", message);
-
     if (isFatal)
-        Fatal(message);
+        AssertLog(message);
     else
         Error(message);
 }

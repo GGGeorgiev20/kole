@@ -51,15 +51,10 @@ void ConfigReader::CreateConfig()
     }
 }
 
-/**
- * @brief Reads the config and sets the config object.
- *
- * Checks if the config has any unrecognized properties and handles any errors in the config.
- * If everything has gone right, read it and create a config object which is then cached in the ConfigReader class.
- */
 void ConfigReader::ReadConfig()
 {
     buildConfig = std::make_shared<BuildConfig>();
+
     if (!std::filesystem::exists(configPath))
     {
         Logger::Info("Config file doesn't exist. Using default values");
@@ -199,25 +194,11 @@ void ConfigReader::ReadConfig()
     }
 }
 
-/**
- * @brief Validates the values of properties.
- *
- * Certain properties in the config can't have empty values for example,
- * so we want to handle these errors before they become a real problem.
- *
- * This function also acts as a post-process, so properties that can
- * take the 'auto' value are calculated here.
- */
 void ConfigReader::PostProcess()
 {
     if (buildConfig->output == "")
     {
         Logger::Fatal("Output name in config can't be empty");
-    }
-
-    if (buildConfig->extension == "auto")
-    {
-        buildConfig->extension = Platform::GetOutputExtension();
     }
 
     if (buildConfig->platform == "auto")
@@ -229,27 +210,22 @@ void ConfigReader::PostProcess()
         Platform::SetPlatform(buildConfig->platform);
     }
 
+    // NOTE: The extension check needs to be after the platform,
+    // or else the extension will be calculated for the user's os
+    if (buildConfig->extension == "auto")
+    {
+        buildConfig->extension = Platform::GetOutputExtension();
+    }
+
     const std::string compileUi = buildConfig->qtSupport.at("compile_ui");
     const std::string uiExtension = buildConfig->qtSupport.at("ui_extension");
+
     if (compileUi == "true" && uiExtension != "hpp" && uiExtension != "h")
     {
         Logger::Warning(fmt::format("UI extension '{}' is not valid and may cause issues.", uiExtension));
     }
 }
 
-/**
- * @brief Processes values of properties.
- *
- * Some properties can have empty values and except empty strings,
- * "none" can also be passed to specify an empty value so we need to process these cases.
- * It's also a useful function if we further in time need to add any processing to any properties.
- *
- * It's also overloaded, as certain properties contain an array instead of a simple string value.
- *
- * @param property: The raw value of the property.
- *
- * @return The processed value of the property.
- */
 std::string ConfigReader::ProcessProperty(std::string property)
 {
     std::string propertyLowercase = property;
@@ -280,14 +256,6 @@ std::vector<std::string> ConfigReader::ProcessProperty(std::vector<std::string> 
     return result;
 }
 
-/**
- * @brief Returns a config object.
- *
- * Reads the config and returns a new config object if it's the first time reading it.
- * Else return the cached config object.
- *
- * @return Either a new config or the cached config.
- */
 std::shared_ptr<BuildConfig> ConfigReader::GetBuildConfig()
 {
     if (buildConfig == nullptr)

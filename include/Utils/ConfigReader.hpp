@@ -59,19 +59,50 @@ struct BuildConfig
 
 namespace ConfigReader
 {
+    /**
+     * @brief Creates a default configuration file if one doesn't exist.
+     */
     void CreateConfig();
 
+    /**
+     * @brief Reads and caches the config file.
+     *
+     * Handles unrecognized properties and errors, then creates a config object.
+     */
     void ReadConfig();
 
+    /**
+     * @brief Validates and finalizes config values.
+     *
+     * Ensures required properties are valid and calculates 'auto' values.
+     */
     void PostProcess();
 
+    /**
+     * @brief Processes a single property value.
+     *
+     * @param property The raw property value.
+     * @return The processed value.
+     */
     std::string ProcessProperty(std::string property);
 
+    /**
+     * @brief Processes a list of property values.
+     *
+     * @param property The raw list of property values.
+     * @return The processed list of values.
+     */
     std::vector<std::string> ProcessProperty(std::vector<std::string> property);
 
+    /**
+     * @brief Retrieves the cached config or reads a new one.
+     *
+     * Returns a shared pointer to the cached `BuildConfig` object, or reads
+     * and creates a new one if it's the first time loading the config.
+     */
     std::shared_ptr<BuildConfig> GetBuildConfig();
 
-    // Variables
+    // NAMESPACE VARIABLES
 
     extern std::string configPath;
     extern std::shared_ptr<BuildConfig> buildConfig;

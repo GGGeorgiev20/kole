@@ -10,11 +10,6 @@ DirectoryManager::DirectoryManager(std::shared_ptr<BuildConfig> config)
     this->config = config;
 }
 
-/**
- * @brief Create missing directories based on the config.
- *
- * Iterates through the configured directories and creates them unless they are excluded or already exist.
- */
 void DirectoryManager::CreateDirectories()
 {
     for (const auto& [directoryKey, directories] : config->directories)
@@ -61,9 +56,6 @@ void DirectoryManager::CreateDirectory(std::string directory)
     }
 }
 
-/**
- * @brief Clears all files in the object directory.
- */
 void DirectoryManager::ClearObjectDirectory()
 {
     try

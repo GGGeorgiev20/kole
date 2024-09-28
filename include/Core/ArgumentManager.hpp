@@ -20,16 +20,44 @@ class ArgumentManager
 public:
     ArgumentManager(int argc, char** argv);
 
+    /**
+     * @brief Processes the command-line arguments.
+     *
+     * Loops through the provided arguments and updates the argument states based on matching identifiers.
+     * Exits the program if unrecognized arguments are found or if help is requested.
+     */
     void ProcessArguments();
 
+    /**
+     * @brief Prints the help menu.
+     */
     void PrintHelp();
 
+    /**
+     * @brief Prints the usage instructions.
+     */
     void PrintUsage();
 
+    /**
+     * @brief Prints an error message for unrecognized arguments.
+     *
+     * @param argument: The unrecognized argument.
+     */
     void PrintUnrecognizedArgument(std::string argument);
 
-    std::string GetArgumentForAutorun();
+    /**
+     * @brief Retrieves the collected arguments for autorun.
+     *
+     * @return The string of arguments meant for autorun, or an empty string if none were found.
+     */
+    std::string GetArgumentsForAutorun();
 
+    /**
+     * @brief Checks the state of a specific argument.
+     *
+     * @param argument: The argument to check.
+     * @return The state of the argument.
+     */
     bool GetArgumentState(Argument argument);
 
 private:

@@ -10,13 +10,6 @@ ArgumentManager::ArgumentManager(int argc, char** argv)
     this->argv = argv;
 }
 
-
-/**
- * @brief Processes the command-line arguments.
- *
- * Loops through the provided arguments and updates the argument states based on matching identifiers.
- * Exits the program if unrecognized arguments are found or if help is requested.
- */
 void ArgumentManager::ProcessArguments()
 {
     // Skip the first argument, as it's the name of the executable
@@ -67,11 +60,6 @@ void ArgumentManager::ProcessArguments()
     }
 }
 
-/**
- * @brief Prints the help menu.
- *
- * Displays the usage information, description, and available options with their descriptions.
- */
 void ArgumentManager::PrintHelp()
 {
     PrintUsage();
@@ -129,11 +117,6 @@ void ArgumentManager::PrintHelp()
     }
 }
 
-/**
- * @brief Prints the usage instructions.
- *
- * Shows how to use the program with a basic command structure.
- */
 void ArgumentManager::PrintUsage()
 {
     printf("usage: kole");
@@ -144,26 +127,12 @@ void ArgumentManager::PrintUsage()
     printf("\n");
 }
 
-/**
- * @brief Prints an error message for unrecognized arguments.
- *
- * Informs the user that an invalid argument was passed.
- *
- * @param argument: The unrecognized argument.
- */
 void ArgumentManager::PrintUnrecognizedArgument(std::string argument)
 {
     printf("kole: error: unrecognized arguments: %s\n", argument.c_str());
 }
 
-/**
- * @brief Retrieves the collected arguments for autorun.
- *
- * Returns the string of arguments meant for autorun, or an empty string if none were found.
- *
- * @return A string of arguments for autorun.
- */
-std::string ArgumentManager::GetArgumentForAutorun()
+std::string ArgumentManager::GetArgumentsForAutorun()
 {
     if (this->argumentsForAutorun.empty())
     {
@@ -177,14 +146,6 @@ std::string ArgumentManager::GetArgumentForAutorun()
     return this->argumentsForAutorun;
 }
 
-/**
- * @brief Checks the state of a specific argument.
- *
- * Returns the state of a particular argument.
- *
- * @param argument: The argument to check.
- * @return The state of the argument.
- */
 bool ArgumentManager::GetArgumentState(Argument argument)
 {
     return argumentStates.at(argument);

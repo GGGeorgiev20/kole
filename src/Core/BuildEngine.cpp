@@ -83,17 +83,6 @@ std::string BuildEngine::GetCompileCommandForFile(std::string sourcePath, std::s
     return "";
 }
 
-/**
- * @brief Generates the command to link object files into a final binary.
- *
- * Constructs the link command using the compiler version, flags, object files,
- * and output binary name.
- *
- * @param files: Vector of object files to link.
- * @param output: The output binary name.
- *
- * @return The formatted link command.
- */
 std::string BuildEngine::GetLinkCommandForProject(std::vector<std::string> files, std::string output)
 {
     std::string flags = GetFlags();
@@ -117,17 +106,6 @@ std::string BuildEngine::GetLinkCommandForProject(std::vector<std::string> files
     return command;
 }
 
-/**
- * @brief Generates the command to compile a source file to an object file.
- *
- * Constructs the compile command using the compiler version, language standard,
- * flags, source file, object file, and include paths.
- *
- * @param source: The source file to compile.
- * @param object: The object file output.
- *
- * @return The formatted compile command.
- */
 std::string BuildEngine::GetCompileCommandForSourceFile(std::string source, std::string output)
 {
     std::string flags = GetFlags();
@@ -157,9 +135,8 @@ std::string BuildEngine::GetCompileCommandForHeaderFile(std::string source, std:
 
     // NOTE: The reason this specific flag is passed to the moc command
     // is to remove the message if a certain header file doesn't need to be compiled.
-    // Personally, I fucking love that feature as it saved a lot of trouble
-    // but I don't like the message (it's great for debugging purposes),
-    // but I don't want it in the build system
+    // Personally, I fucking love that feature as it saves me a lot of trouble
+    // but I don't want it to show up (it's great for debugging purposes, it's just not aesthetic),
 
     return command;
 }
@@ -175,14 +152,6 @@ std::string BuildEngine::GetCompileCommandForUIFile(std::string source, std::str
     return command;
 }
 
-/**
- * @brief Retrieves and caches the necessary compile flags.
- *
- * Gathers platform-specific and common flags, along with optimization levels,
- * and caches them for future use.
- *
- * @return The formatted compile flags.
- */
 std::string BuildEngine::GetFlags()
 {
     if (!flags.empty()) return flags;
@@ -214,13 +183,6 @@ std::string BuildEngine::GetFlags()
     return flags;
 }
 
-/**
- * @brief Retrieves and caches the necessary include paths.
- *
- * Collects include directories from the configuration and caches them for future use.
- *
- * @return The formatted include paths.
- */
 std::string BuildEngine::GetIncludePaths()
 {
     if (!includePaths.empty()) return includePaths;

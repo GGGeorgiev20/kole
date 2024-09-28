@@ -13,10 +13,10 @@ exclude: []
 
 flags:
   common: -Wall -Wunused-variable -Wextra -Wno-enum-compare -g -ggdb -fdiagnostics-color=always
-  windows: -lgdi32 -lwinmm -static-libstdc++ -lfmt -lyaml-cpp
+  windows: -static-libstdc++ -lfmt -lyaml-cpp
   linux: -lm -lpthread -ldl -lrt -lX11 -lfmt -lyaml-cpp
 
 compiler_version: g++
-language_version: c++17
+language_version: c++20
 
 optimization: release

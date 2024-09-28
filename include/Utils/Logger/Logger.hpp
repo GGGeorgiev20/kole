@@ -21,5 +21,7 @@ namespace Logger
 
     void Fatal(std::string message);
 
+    void AssertLog(std::string message);
+
     void Assert(std::string message, bool condition, bool isFatal = true);
 };

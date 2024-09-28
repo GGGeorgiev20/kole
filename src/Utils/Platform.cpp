@@ -7,8 +7,8 @@
 void Platform::SetPlatform(std::string platformName)
 {
     transform(platformName.begin(), platformName.end(), platformName.begin(), ::tolower);
-    Logger::Debug(fmt::format("Platform '{}' specified. Adjusting build settings.", platformName));
 
+    // Get the value from the enum for the specified platform name
     for (const auto& [key, value] : platformNames)
     {
         std::string mapPlatformName = value;
@@ -16,20 +16,16 @@ void Platform::SetPlatform(std::string platformName)
 
         if (platformName == mapPlatformName)
         {
+            Logger::Debug(fmt::format("Platform '{}' specified. Adjusting build settings.", platformName));
+            
             savedPlatform = key;
             return;
         }
     }
 
-    Logger::Warning(fmt::format("Unrecognized platform '{}'. Defaulting to user's operating system: '{}'", platformName, Platform::GetPlatformName()));
+    Logger::Warning(fmt::format("Platform '{}' not recognized. Defaulting to '{}'.", platformName, GetPlatformName()));
 }
 
-/**
- * @brief Get the platform of the user.
- *
- * Gets the platform of the user using macros.
- * Also uses cache so that the message isn't printed every time a file is compiled.
- */
 int Platform::GetPlatform()
 {
     if (savedPlatform != -1) return savedPlatform;
@@ -55,9 +51,6 @@ int Platform::GetPlatform()
     return platform;
 }
 
-/**
- * @brief Get an extension suitable for the users' operating system.
- */
 std::string Platform::GetOutputExtension()
 {
     const int platform = GetPlatform();
@@ -77,16 +70,13 @@ std::string Platform::GetOutputExtension()
     }
 }
 
-/**
- * @brief Get the name of the users' operating system.
- */
 std::string Platform::GetPlatformName()
 {
     const int platform = GetPlatform();
     return platformNames.at(platform);
 }
 
-// Variables
+// NAMESPACE VARIABLES
 
 int Platform::savedPlatform = -1;
 

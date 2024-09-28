@@ -31,5 +31,5 @@ int main(int argc, char** argv)
     fileCompiler->LinkObjectFiles();
 
     if (argumentManager->GetArgumentState(Argument::Autorun))
-        fileCompiler->RunBinaryExecutable(argumentManager->GetArgumentForAutorun());
+        fileCompiler->RunBinaryExecutable(argumentManager->GetArgumentsForAutorun());
 }

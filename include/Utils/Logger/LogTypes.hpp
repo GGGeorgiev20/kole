@@ -12,11 +12,12 @@ namespace LogTypes
         Warning,
         Error,
         Fatal,
+        Assert,
     };
 
     void EnableDebug();
 
-    // Variables
+    // NAMESPACE VARIABLES
 
     extern std::map<LogType, bool> LogTypeStatuses;
     extern std::map<LogType, std::string> LogTypePrefixes;

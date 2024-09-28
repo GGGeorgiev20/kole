@@ -22,6 +22,9 @@ int main(int argc, char** argv)
     std::shared_ptr<DirectoryManager> directoryManager = std::make_shared<DirectoryManager>(config);
     directoryManager->CreateDirectories();
 
+    if (argumentManager->GetArgumentState(Argument::Config))
+        return 0;
+
     if (argumentManager->GetArgumentState(Argument::Clear))
         directoryManager->ClearObjectDirectory();
 

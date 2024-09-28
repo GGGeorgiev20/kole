@@ -1,79 +1,73 @@
-# Build Script
+# Kole
 
-This project includes a Python script (`build.py`) designed to automate the compilation process for C++ projects. The script leverages a configuration file (`config.yaml`) to set up directories, flags, and other compilation settings. This document provides detailed instructions on how to use the script and configure your project.
+Kole is a small cross-platform, open-source build system written in C++. It's made to be highly customizable by storing all build settings in the configuration file (`KoleConfig.yaml`). You can use it if you are compiling any C/C++ projects.
+
+I want to note that this is a project is not indended for use on professional or large projects. I don't intend on updating it a lot or making it suitable for any type of projects. I have neither the time nor the will to do so.
+
+What I intend to use this project for is, mainly, projects which share a similar structure to mine (this project acts as an example). If you share a similar structure for your projects and you like this program, I'd be glad if you use it.
+
+If you run into issues or need something fixed, feel free to reach out, and I’ll help out when I can. You’re also welcome to contribute — just let me know :)
 
 ## Prerequisites
 
-Before using the script, ensure you have the following installed:
+Before using Kole, make sure you have:
 
-- Python 3.x
 - GCC (GNU Compiler Collection)
 
-## Configuration
+## Installation
 
-The configuration file (`config.yaml`) is essential for specifying various settings required during the build process. Below is a detailed explanation of the configuration options.
+Kole currently only supports Linux as I am not booting Windows at the moment. While the config file does let you specify a target platform, the program doesn’t run on Windows at the moment (although it does compile). If you're on Windows, you can use another build system to compile it, and it should work. I plan to fix the issue and add support for other operating systems in the future tho.
 
-### Configuration Fields Explained
+### How to Install (Linux)
 
-- **`output`**: 
-  - Specifies the name of the final executable file produced by the build process. This should be the base name without any file extension. For example, if you want your output file to be named `main.out` or `main.exe`, you would set `output` to `main`.
+Since there’s no package available yet, you’ll need to install it manually. Luckily, it’s just a single binary:
 
-- **`directories`**: 
-  - **`src`**: The directory or directories where all the C++ source files (`.cpp`) are located. This can be a single directory or a list of directories if your source files are spread across multiple locations.
-  - **`obj`**: The directory where compiled object files (`.o` files) are stored. These are intermediate files created during the build process.
-  - **`bin`**: The directory where the final executable file will be placed.
-  - **`include`**: The directory or directories where header files are stored. This can also be a single directory or a list of directories if your header files are located in multiple places.
+1. Start by downloading the `kole` binary from the Release section.
 
-- **`ignore`**: 
-  - This array allows you to specify directories that should not be created by the script. If a directory listed here is required but does not exist, an error will occur.
+2. Move the binary to your `/usr/local/bin` directory using the following command:
 
-- **`flags`**: 
-  - **`error_flags`**: General compiler warning and debugging flags to enforce good coding practices and aid in debugging.
-  - **`windows_lib_flags`**: Additional linker flags required for compiling on Windows platforms. These may include specific libraries needed for Windows.
-  - **`unix_lib_flags`**: Additional linker flags required for compiling on Unix-like platforms (e.g., Linux, macOS). These typically include libraries used in Unix-based systems.
-  - **`end_flags`**: Any final flags to be added at the end of the compilation command.
+```bash
+sudo mv kole /usr/local/bin
+```
 
-- **`compiler_version`**: 
-  - Defines the C++ compiler to use, such as `g++`. Ensure that the specified compiler is installed on your system.
-
-- **`language_version`**: 
-  - Specifies the C++ language standard to be used during compilation, such as `c++20`.
-
-- **`build_type`**: 
-  - Defines the build mode. Set this to `debug` for a build with debug information and no optimizations, or `release` for an optimized build suitable for production.
+After that, you're ready to go!
 
 ## Usage
 
-### Setting Up
+### Configuration
 
-1. **Create the Configuration File**: Ensure that `config.yaml` is placed in the same directory as `build.py`. Configure the file according to the explanations provided above.
-2. **Prepare the Directory Structure**: Create the necessary directories for source files, object files, binaries, and headers as specified in your configuration file.
+The configuration file (`KoleConfig.yaml`) is essential for specifying various settings required during the build process. For a detailed explanation of every field, please check the `docs` folder. For an example, check the config file of this project.
 
-### Running the Script
+### Running the program
 
-To execute the `build.py` script, navigate to the directory containing both the script and the configuration file, and run the command:
+#### Starting a new project
 
-`python build.py`
+To start up a new project, navigate to an empty directory and run:
+```bash
+kole --config
+```
+This creates a default config file and sets up all necessary directories for your project.
 
-#### Command-Line Arguments
+#### Building an existing project
 
-- **`clear`**: Use this argument to rebuild all files from scratch. It deletes existing object files before starting the build process.
-- **`run`**: Use this argument to run the final executable after a successful build.
+To build an already existing project, go to its' directory and follow these instructions:
 
-For example:
+1. Create a default config file using this command:
+```bash
+kole --config
+```
+2. Change the settings in it according to your projects' needs and dependencies
+3. Run the command:
+```bash
+kole
+```
 
-`python build.py clear run`
+This should hopefully compile the project and build a binary executable for you to run.
 
-This command will first clear all existing object files, then build the project from scratch, and finally run the generated executable.
+### Command-Line Arguments
 
-### Script Functions
-
-- **Loading Configuration**: The script reads settings from `config.yaml` to determine the build process.
-- **Creating Directories**: It creates necessary directories for source files, object files, binaries, and headers, unless specified otherwise in the `ignore` array.
-- **Compiling Source Files**: The script compiles each `.cpp` file in the source directory into an object file, and then links these object files to create the final executable.
-- **Running the Build**: After successful compilation, the script can run the final executable if the `run` argument is provided.
-
-By following these instructions and configuring the `config.yaml` file appropriately, you can efficiently manage and automate your C++ project's build process.
-<br>
-This README.md is generated by ChatGPT (this line is written by author, not pasted blindly).
-
+- **`--help`**: Displays the help menu and exits the program.
+- **`--config`**: Creates a default config file, if one doesn't already exist and doesn't compile the project. Mainly used when starting a new project.
+- **`--clear`**: Deletes EVERYTHING in the `obj` directory. Useful when you need to rebuild all object files.
+- **`--debug`**: Prints debug logs. Helps when the program doesn't compile and you're debugging it.
+- **`--autorun`**: Runs the final executable after a successful build. All arguments after it are passed to the executable.

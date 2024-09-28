@@ -29,7 +29,7 @@ public:
     void ProcessArguments();
 
     /**
-     * @brief Prints the help menu.
+     * @brief Prints the help menu and exits the program.
      */
     void PrintHelp();
 
@@ -53,10 +53,10 @@ public:
     std::string GetArgumentsForAutorun();
 
     /**
-     * @brief Checks the state of a specific argument.
+     * @brief Checks the boolean state of a specific argument.
      *
      * @param argument: The argument to check.
-     * @return The state of the argument.
+     * @return The boolean state of the argument.
      */
     bool GetArgumentState(Argument argument);
 

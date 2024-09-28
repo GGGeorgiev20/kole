@@ -13,7 +13,7 @@ public:
      * @brief Generates the command to compile a file.
      *
      * Constructs the compile command for a file depending on its' extension.
-     * Supports source, header and ui files.
+     * Supports source, header and UI files.
      *
      * @param sourcePath: The source file path.
      * @param sourceFileName: The source file name.
@@ -46,8 +46,24 @@ public:
      */
     std::string GetCompileCommandForSourceFile(std::string source, std::string output);
 
+    /**
+     * @brief Generates the command to compile a header file to a moc file.
+     *
+     * @param source: The source file to compile.
+     * @param object: The output file path.
+     *
+     * @return The formatted compile command.
+     */
     std::string GetCompileCommandForHeaderFile(std::string source, std::string output);
 
+    /**
+     * @brief Generates the command to compile a UI file to a UI header file.
+     *
+     * @param source: The source file to compile.
+     * @param object: The output file path.
+     *
+     * @return The formatted compile command.
+     */
     std::string GetCompileCommandForUIFile(std::string source, std::string output);
 
     /**

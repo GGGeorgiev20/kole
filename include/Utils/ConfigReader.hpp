@@ -38,10 +38,10 @@ struct BuildConfig
         { "unix",         "" },
     };
 
-    // NOTE: The value type can actually be a variant meaning
-    // it can be either a string or a bool but that means that
-    // then I will have to check if they're a specific type
-    // every time they're cast and that's annoying so I just won't bother
+    // NOTE: The value type can actually be a variant,
+    // meaning it can be either a string or a bool,
+    // but in that case I will have to check if they're a specific type
+    // every time they're cast (and that's annoying so I just won't bother)
     std::map<std::string, std::string> qtSupport = {
         { "compile_ui",         "false" },
         { "compile_moc",        "false" },

@@ -20,7 +20,7 @@ public:
      * @brief Compiles source files to object files.
      *
      * Iterates through configured directories (e.g., 'src') and compiles source
-     * files into object files. Includes UI and header files if Qt support is enabled.
+     * files into object files. Includes UI and header files if QT support is enabled.
      */
     void CompileObjectFiles();
 
@@ -35,7 +35,7 @@ public:
     /**
      * @brief Runs the compiled binary executable with optional arguments.
      *
-     * Adjusts path separators for compatibility with the target platform (Linux/Windows).
+     * Adjusts path separators for compatibility with the target platform (Linux/MacOS/Windows).
      *
      * @param arguments Arguments to pass to the executable.
      */
@@ -45,13 +45,13 @@ private:
     std::shared_ptr<BuildConfig> config;
     std::shared_ptr<BuildEngine> buildEngine;
 
-    // NOTE: Usually, only files in the src directories are compiled
-    // But if the user is using qt, ui and header files also need to be compiled
+    // NOTE: Usually, only files in the src directories are compiled.
+    // But if the user is using Qt, UI & header files also need to be compiled.
     // So instead of checking 3 different arrays of directories,
-    // just add the ui, include and src directories to one array
+    // just add the UI, include & src directories to one array
     std::vector<std::string> directoriesForCompilation;
 
     // NOTE: The output of the LinkObjectFiles is saved
-    // so that it can be later ran by RunBinaryExecutable if needed
+    // so that it can be ran later by RunBinaryExecutable if needed
     std::string output;
 };

@@ -12,7 +12,8 @@ enum class Argument
     Clear,
     Autorun,
     Debug,
-    Config
+    Config,
+    CreateDirs,
 };
 
 class ArgumentManager
@@ -71,28 +72,31 @@ private:
 
     // Map of arguments and their possible identifiers (flags)
     const std::map<Argument, std::vector<std::string>> argumentIdentifiers = {
-        { Argument::Help,         { "-h", "--help" } },
-        { Argument::Clear,        { "--clear" }      },
-        { Argument::Autorun,      { "--autorun" }    },
-        { Argument::Debug,        { "--debug" }      },
-        { Argument::Config,       { "--config" }     },
+        { Argument::Help,             { "-h", "--help" } },
+        { Argument::Clear,            { "--clear" }      },
+        { Argument::Autorun,          { "--autorun" }    },
+        { Argument::Debug,            { "--debug" }      },
+        { Argument::Config,           { "--config" }     },
+        { Argument::CreateDirs,       { "--createdirs" } },
     };
 
     // Map of arguments and their descriptions
     const std::map<Argument, std::string> argumentDescriptions = {
-        { Argument::Help,         "Show this help message and exit"              },
-        { Argument::Clear,        "Clear all object files before building"       },
-        { Argument::Autorun,      "Autorun the compiled binary after building"   },
-        { Argument::Debug,        "Show logs used for debugging"                 },
-        { Argument::Config,       "Create a default config if one doesn't exist" },
+        { Argument::Help,             "Show this help message and exit"              },
+        { Argument::Clear,            "Clear all object files before building"       },
+        { Argument::Autorun,          "Autorun the compiled binary after building"   },
+        { Argument::Debug,            "Show logs used for debugging"                 },
+        { Argument::Config,           "Create a default config if one doesn't exist" },
+        { Argument::CreateDirs,       "Creates all missing directories" },
     };
 
     // Map to track the state (whether the argument was provided or not)
     std::map<Argument, bool> argumentStates = {
-        { Argument::Help,         false },
-        { Argument::Clear,        false },
-        { Argument::Autorun,      false },
-        { Argument::Debug,        false },
-        { Argument::Config,       false },
+        { Argument::Help,             false },
+        { Argument::Clear,            false },
+        { Argument::Autorun,          false },
+        { Argument::Debug,            false },
+        { Argument::Config,           false },
+        { Argument::CreateDirs,       false },
     };
 };

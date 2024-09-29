@@ -1,4 +1,4 @@
-#include "Utils/ConfigReader.hpp"
+#include "Core/ConfigReader.hpp"
 
 std::string ConfigReader::defaultConfig = R"(output: main
 extension: auto
@@ -8,8 +8,6 @@ directories:
   obj: obj
   bin: bin
   include: [ include ]
-
-exclude: []
 
 flags:
   common: none

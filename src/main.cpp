@@ -2,7 +2,7 @@
 #include "Core/DirectoryManager.hpp"
 #include "Core/FileCompiler.hpp"
 
-#include "Utils/ConfigReader.hpp"
+#include "Core/ConfigReader.hpp"
 #include "Utils/Logger/LogTypes.hpp"
 
 int main(int argc, char** argv)
@@ -20,9 +20,11 @@ int main(int argc, char** argv)
     ConfigReader::PostProcess();
 
     std::shared_ptr<DirectoryManager> directoryManager = std::make_shared<DirectoryManager>(config);
-    directoryManager->CreateDirectories();
 
-    if (argumentManager->GetArgumentState(Argument::Config))
+    if (argumentManager->GetArgumentState(Argument::CreateDirs))
+        directoryManager->CreateDirectories();
+
+    if (argumentManager->GetArgumentState(Argument::Config) || argumentManager->GetArgumentState(Argument::CreateDirs))
         return 0;
 
     if (argumentManager->GetArgumentState(Argument::Clear))

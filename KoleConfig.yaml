@@ -9,8 +9,6 @@ directories:
   bin: bin
   include: [ include ]
 
-exclude: []
-
 flags:
   common: -Wall -Wunused-variable -Wextra -Wno-enum-compare -g -ggdb -fdiagnostics-color=always
   windows: -static-libstdc++ -lfmt -lyaml-cpp

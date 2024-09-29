@@ -1,4 +1,4 @@
-#include "Utils/ConfigReader.hpp"
+#include "Core/ConfigReader.hpp"
 #include "Utils/Logger/Logger.hpp"
 
 #include <fstream>
@@ -15,7 +15,6 @@ std::unordered_set<std::string> ConfigReader::recognizedKeys = {
     "extension",
     "platform",
     "directories",
-    "exclude",
     "flags",
     "qt_support",
     "compiler_version",
@@ -27,7 +26,7 @@ void ConfigReader::CreateConfig()
 {
     if (fs::exists(configPath))
     {
-        Logger::Warning("The config flag was specified but a config file already exists. Ignoring...");
+        Logger::Warning("The config flag was specified, but a config file already exists");
         return;
     }
 
@@ -124,17 +123,6 @@ void ConfigReader::ReadConfig()
             }
         }
 
-        if (config["exclude"])
-        {
-            const auto& excluded = config["exclude"];
-
-            for (const auto& exclude : excluded)
-            {
-                std::string value = exclude.as<std::string>();
-                buildConfig->exclude.push_back(ProcessProperty(value));
-            }
-        }
-
         if (config["flags"])
         {
             const auto& flags = config["flags"];
@@ -196,10 +184,9 @@ void ConfigReader::ReadConfig()
 
 void ConfigReader::PostProcess()
 {
-    if (buildConfig->output == "")
-    {
-        Logger::Fatal("Output name in config can't be empty");
-    }
+    Logger::Assert("Output name in config can't be empty", !buildConfig->output.empty());
+    Logger::Assert("Platform in config can't be empty", !buildConfig->platform.empty());
+    Logger::Assert("Compiler version in config can't be empty", !buildConfig->compilerVersion.empty());
 
     if (buildConfig->platform == "auto")
     {

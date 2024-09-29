@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core/BuildEngine.hpp"
-#include "Utils/ConfigReader.hpp"
+#include "Core/ConfigReader.hpp"
 
 class FileCompiler
 {

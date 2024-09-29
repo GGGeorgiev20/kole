@@ -14,19 +14,6 @@ void DirectoryManager::CreateDirectories()
 {
     for (const auto& [directoryKey, directories] : config->directories)
     {
-        bool dirIsExcluded = false;
-
-        for (const auto& directory : config->exclude)
-        {
-            if (directoryKey == directory)
-            {
-                dirIsExcluded = true;
-                break;
-            }
-        }
-
-        if (dirIsExcluded) continue;
-
         for (const auto& directory : directories)
         {
             CreateDirectory(directory);
@@ -42,7 +29,11 @@ void DirectoryManager::CreateDirectory(std::string directory)
     {
         const fs::path directoryPath = directory;
 
-        if (fs::exists(directoryPath)) return;
+        if (fs::exists(directoryPath))
+        {
+            Logger::Warning(fmt::format("Directory '{}' already exists. Skipping...", directory));
+            return;
+        }
 
         if (fs::create_directory(directoryPath))
             Logger::Info(fmt::format("Created empty directory '{}'", directory));

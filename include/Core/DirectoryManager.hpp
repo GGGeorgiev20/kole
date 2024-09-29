@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "Utils/ConfigReader.hpp"
+#include "Core/ConfigReader.hpp"
 
 class DirectoryManager
 {

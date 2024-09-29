@@ -2,9 +2,9 @@
 
 Kole is a small cross-platform, open-source build system written in C++. It's made to be highly customizable by storing all build settings in the configuration file (`KoleConfig.yaml`). You can use it if you are compiling any C/C++ projects.
 
-I want to note that this is a project is not indended for use on professional or large projects. I don't intend on updating it a lot or making it suitable for any type of projects. I have neither the time nor the will to do so.
+I want to note that this project is not indended for use on professional or large projects. I don't intend on updating it frequently or making it suitable for all types of projects. I have neither the time nor the will to do so.
 
-What I intend to use this project for is, mainly, projects which share a similar structure to mine (this project acts as an example). If you share a similar structure for your projects and you like this program, I'd be glad if you use it.
+What I intend to use this project for, is mainly projects which share a similar structure to mine (this project acts as an example). If you share a similar structure for your projects and you like this program, I'd be glad if you use it.
 
 If you run into issues or need something fixed, feel free to reach out, and I’ll help out when I can. You’re also welcome to contribute — just let me know :)
 
@@ -50,13 +50,13 @@ This creates a default config file and sets up all necessary directories for you
 
 #### Building an existing project
 
-To build an already existing project, go to its' directory and follow these instructions:
+To build an already existing project, go to its directory and follow these instructions:
 
 1. Create a default config file using this command:
 ```bash
 kole --config
 ```
-2. Change the settings in it according to your projects' needs and dependencies
+2. Change the settings in it to fit your projects needs
 3. Run the command:
 ```bash
 kole
@@ -68,7 +68,7 @@ This should hopefully compile the project and build a binary executable for you 
 
 - **`--help`**: Displays the help menu and exits the program.
 - **`--clear`**: Deletes EVERYTHING in the `obj` directory. Useful when you need to rebuild all object files.
-- **`--debug`**: Prints debug logs. Helps when the program doesn't compile and you're debugging it.
+- **`--debug`**: Prints debug logs. Helps when the program doesn't compile and you need to find out why.
 - **`--autorun`**: Runs the final executable after a successful build. All arguments after it are passed to the executable.
 - **`--config`**: Creates a default config file, if one doesn't already exist and doesn't compile the project. Mainly used when starting a new project.
 - **`--createdirs`**: Creates all necessary directories, if they doesn't already exist and doesn't compile the project. Mainly used when starting a new project.

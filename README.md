@@ -44,7 +44,7 @@ The configuration file (`KoleConfig.yaml`) is essential for specifying various s
 
 To start up a new project, navigate to an empty directory and run:
 ```bash
-kole --config
+kole --config --createdirs
 ```
 This creates a default config file and sets up all necessary directories for your project.
 
@@ -67,7 +67,8 @@ This should hopefully compile the project and build a binary executable for you 
 ### Command-Line Arguments
 
 - **`--help`**: Displays the help menu and exits the program.
-- **`--config`**: Creates a default config file, if one doesn't already exist and doesn't compile the project. Mainly used when starting a new project.
 - **`--clear`**: Deletes EVERYTHING in the `obj` directory. Useful when you need to rebuild all object files.
 - **`--debug`**: Prints debug logs. Helps when the program doesn't compile and you're debugging it.
 - **`--autorun`**: Runs the final executable after a successful build. All arguments after it are passed to the executable.
+- **`--config`**: Creates a default config file, if one doesn't already exist and doesn't compile the project. Mainly used when starting a new project.
+- **`--createdirs`**: Creates all necessary directories, if they doesn't already exist and doesn't compile the project. Mainly used when starting a new project.

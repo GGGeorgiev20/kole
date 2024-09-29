@@ -43,10 +43,10 @@ struct BuildConfig
     std::map<std::string, std::string> qtSupport = {
         { "compile_ui",         "false" },
         { "compile_moc",        "false" },
-        { "ui_prefix",            ""    },
-        { "ui_extension",         ""    },
-        { "ui_output_dir",        ""    },
-        { "moc_prefix",           ""    },
+        { "ui_prefix",           "ui_"  },
+        { "ui_extension",        "h"    },
+        { "ui_output_dir",       "ui"   },
+        { "moc_prefix",         "moc_"  },
     };
 
     std::string compilerVersion = "g++";

@@ -17,4 +17,4 @@ flags:
 compiler_version: g++
 language_version: c++20
 
-optimization: release
+optimization: debug

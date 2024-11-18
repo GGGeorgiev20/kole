@@ -21,7 +21,7 @@ int main(int argc, char** argv)
 
     std::shared_ptr<DirectoryManager> directoryManager = std::make_shared<DirectoryManager>(config);
 
-    if (argumentManager->GetArgumentState(Argument::CreateDirs))
+    if (argumentManager->GetArgumentState(Argument::Setup))
         directoryManager->CreateDirectories();
 
     if (argumentManager->GetArgumentState(Argument::Config) || argumentManager->GetArgumentState(Argument::CreateDirs))

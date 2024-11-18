@@ -28,6 +28,8 @@ struct BuildConfig
         { "include",          { "include" } },
     };
 
+    std::vector<std::string> exclude;
+
     std::map<std::string, std::string> flags = {
         { "common",       "" },
         { "windows",      "" },

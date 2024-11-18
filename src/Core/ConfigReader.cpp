@@ -15,6 +15,7 @@ std::unordered_set<std::string> ConfigReader::recognizedKeys = {
     "extension",
     "platform",
     "directories",
+    "exclude",
     "flags",
     "qt_support",
     "compiler_version",
@@ -120,6 +121,17 @@ void ConfigReader::ReadConfig()
                     std::string value = dir.second.as<std::string>();
                     buildConfig->directories[key] = { ProcessProperty(value) };
                 }
+            }
+        }
+
+        if (config["exclude"])
+        {
+            const auto& excluded = config["exclude"];
+
+            for (const auto& exclude : excluded)
+            {
+                std::string value = exclude.as<std::string>();
+                buildConfig->exclude.push_back(ProcessProperty(value));
             }
         }
 

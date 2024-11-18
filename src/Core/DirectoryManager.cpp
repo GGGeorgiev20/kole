@@ -14,6 +14,10 @@ void DirectoryManager::CreateDirectories()
 {
     for (const auto& [directoryKey, directories] : config->directories)
     {
+        // Check if directory to be created is excluded in the config, if it is - don't create it
+        if (std::find(config->exclude.begin(), config->exclude.end(), directoryKey) != config->exclude.end())
+            continue;
+
         for (const auto& directory : directories)
         {
             CreateDirectory(directory);

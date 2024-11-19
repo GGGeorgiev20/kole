@@ -43,7 +43,7 @@ void DirectoryManager::CreateDirectory(std::string directory)
 
         if (fs::exists(directoryPath))
         {
-            Logger::Warning(fmt::format("Directory '{}' already exists. Skipping...", directory));
+            Logger::Debug(fmt::format("Directory '{}' already exists. Skipping...", directory));
             return;
         }
 

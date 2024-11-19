@@ -22,7 +22,7 @@ std::string BuildEngine::GetCompileCommandForFile(std::string sourcePath, std::s
     std::string outputDirectory;
 
     // Determine output extension and directory based on source file extension
-    if (sourceExtension == "cpp")
+    if (sourceExtension == "cpp" || sourceExtension == "c")
     {
         outputExtension = "o";
         outputDirectory = "obj";
@@ -67,7 +67,7 @@ std::string BuildEngine::GetCompileCommandForFile(std::string sourcePath, std::s
         }
     }
 
-    if (sourceExtension == "cpp")
+    if (sourceExtension == "cpp" || sourceExtension == "c")
     {
         return GetCompileCommandForSourceFile(sourcePath, outputPath);
     }

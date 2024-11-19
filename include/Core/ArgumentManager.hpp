@@ -25,7 +25,7 @@ public:
      * @brief Processes the command-line arguments.
      *
      * Loops through the provided arguments and updates the argument states based on matching identifiers.
-     * Exits the program if unrecognized arguments are found or if help is requested.
+     * Exits the program if unrecognized arguments are found or the help paramter is passed.
      */
     void ProcessArguments();
 
@@ -45,6 +45,13 @@ public:
      * @param argument: The unrecognized argument.
      */
     void PrintUnrecognizedArgument(std::string argument);
+
+    /**
+     * @brief Prints usage, unrecognized argument and exits.
+     *
+     * @param argument: The unrecognized argument.
+     */
+    void ArgumentNotFound(std::string argument);
 
     /**
      * @brief Retrieves the collected arguments for autorun.

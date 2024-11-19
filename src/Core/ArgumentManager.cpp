@@ -17,7 +17,7 @@ void ArgumentManager::ProcessArguments()
     // Skip the first argument, as it's the name of the executable
     for (int i = 1; i < argc; i++)
     {
-        char* argument = argv[i];
+        std::string argument(argv[i]);
         Logger::Debug(fmt::format("Processing argument '{}'", argument));
 
         bool argumentIsFound = false;
@@ -27,38 +27,53 @@ void ArgumentManager::ProcessArguments()
             argumentsForAutorun += fmt::format("{} ", argument);
             continue;
         }
+        
+        if (argument[0] != '-')
+            ArgumentNotFound(argument);
+
+        bool longhand = false;
+
+        if (argument[1] == '-')
+            longhand = true;
+
+        // Skip the 2 first characters of the argument (in this case '--') if the argument is long-hand
+        // and just 1 if it's short-hand
+        std::string sequence = argument.substr(1 + longhand);
 
         for (const auto& [key, value] : argumentIdentifiers)
         {
-            for (const auto& identifier : value)
+            if (argument.find(value[longhand]) != std::string::npos)
             {
-                if (identifier == argument)
-                {
-                    argumentStates[key] = true;
-                    argumentIsFound = true;
-                    break;
-                }
+                argumentStates[key] = true;
+                argumentIsFound = true;
             }
 
             if (argumentIsFound)
             {
                 if (key == Argument::Help)
                 {
-                    Logger::Debug("Found help argument. Stopping and displaying help menu");
+                    Logger::Debug("Help argument found. Stopping program and displaying help menu");
                     PrintHelp();
                     exit(0);
                 }
 
-                break;
+                // Multiple short-hand arguments can be packed in one sequence,
+                // but only one long-hand can be passed at once
+                // e.g. '-hrc' as opposed to '--clear'
+                if (longhand)
+                    break;
             }
         }
 
         if (!argumentIsFound)
-        {
-            PrintUsage();
-            PrintUnrecognizedArgument(argument);
-            exit(1);
-        }
+            ArgumentNotFound(argument);
+    }
+
+
+    for (const auto& [key, value] : argumentIdentifiers)
+    {
+        if (argumentStates.at(key) == true)
+            Logger::Debug(fmt::format("Argument with identifier {} has state of true.", value[1]));
     }
 }
 
@@ -74,6 +89,9 @@ void ArgumentManager::PrintHelp()
     // For example:
     // -h, --help   Shows this help menu
     // --clear      Clears the object files
+
+    const int optionIndentation = 2;
+    const int minimalSpaceToDesc = 3;
 
     uint16_t longestOption = 0;
 
@@ -98,14 +116,19 @@ void ArgumentManager::PrintHelp()
 
     for (const auto& [key, value] : argumentIdentifiers)
     {
+        std::string identifiers = "";
+
         for (size_t i = 0; i < value.size(); i++)
         {
-            if (i > 0) printf(", ");
+            if (i > 0) identifiers += ", ";
 
-            printf("-%c%s", value[i].length() > 1 && '-', value[i].c_str());
+            if (value[i].length() > 1) identifiers += "-";
+            identifiers += "-" + value[i];
         }
 
-        std::cout << std::left << std::setw(longestOption + 2) << argumentDescriptions.at(key) << std::endl;
+        std::cout << std::setw(optionIndentation) << " ";
+        std::cout << std::left << std::setw(longestOption + minimalSpaceToDesc) << identifiers;
+        std::cout << argumentDescriptions.at(key) << std::endl;
     }
 }
 
@@ -117,7 +140,16 @@ void ArgumentManager::PrintUsage()
         // The arguments in the argument map are sorted so that the first element is always the short-hand, if it has one.
         // Because of that, we can check if the first element has a length longer than 1 (is long-hand)
         // and if it is, add an extra '-'.
-        printf(" [-%c%s]", value[0].length() > 1 && '-', value[0].c_str());
+        printf(" [");
+        for (size_t i = 0; i < value.size(); i++)
+        {
+            const auto& identifier = value[i];
+
+            if (i > 0) printf(", ");
+            if (identifier.length() > 1) printf("-");
+            printf("-%s", identifier.c_str());
+        }
+        printf("]");
     }
     printf("\n");
 }
@@ -125,6 +157,13 @@ void ArgumentManager::PrintUsage()
 void ArgumentManager::PrintUnrecognizedArgument(std::string argument)
 {
     printf("kole: error: unrecognized arguments: %s\n", argument.c_str());
+}
+
+void ArgumentManager::ArgumentNotFound(std::string argument)
+{
+    PrintUsage();
+    PrintUnrecognizedArgument(argument);
+    exit(1);
 }
 
 std::string ArgumentManager::GetArgumentsForAutorun()

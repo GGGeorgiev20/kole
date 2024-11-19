@@ -9,6 +9,8 @@ directories:
   bin: bin
   include: [ include ]
 
+autocreate: [ obj, bin ]
+
 flags:
   common: -Wall -Wunused-variable -Wextra -Wno-enum-compare -g -ggdb -fdiagnostics-color=always
   windows: -static-libstdc++ -lfmt -lyaml-cpp

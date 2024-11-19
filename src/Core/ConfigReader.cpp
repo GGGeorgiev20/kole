@@ -15,7 +15,7 @@ std::unordered_set<std::string> ConfigReader::recognizedKeys = {
     "extension",
     "platform",
     "directories",
-    "exclude",
+    "autocreate",
     "flags",
     "qt_support",
     "compiler_version",
@@ -124,14 +124,14 @@ void ConfigReader::ReadConfig()
             }
         }
 
-        if (config["exclude"])
+        if (config["autocreate"])
         {
-            const auto& excluded = config["exclude"];
+            const auto& autocreated = config["autocreate"];
 
-            for (const auto& exclude : excluded)
+            for (const auto& autocreate : autocreated)
             {
-                std::string value = exclude.as<std::string>();
-                buildConfig->exclude.push_back(ProcessProperty(value));
+                std::string value = autocreate.as<std::string>();
+                buildConfig->autocreate.push_back(ProcessProperty(value));
             }
         }
 

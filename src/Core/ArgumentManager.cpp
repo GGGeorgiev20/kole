@@ -12,6 +12,8 @@ ArgumentManager::ArgumentManager(int argc, char** argv)
 
 void ArgumentManager::ProcessArguments()
 {
+    // TODO: Fix arguments. Very bugged.
+
     // Skip the first argument, as it's the name of the executable
     for (int i = 1; i < argc; i++)
     {
@@ -73,47 +75,37 @@ void ArgumentManager::PrintHelp()
     // -h, --help   Shows this help menu
     // --clear      Clears the object files
 
-    size_t longestOption = 0;
-    std::map<Argument, size_t> argumentLengths;
+    uint16_t longestOption = 0;
 
     for (const auto& [key, value] : argumentIdentifiers)
     {
-        // Arguments can have multiple identifiers (e.g., "-h, --help").
-        // These identifiers are separated by a comma and a space (2 characters total).
-        // Instead of conditionally adding 2 characters after the first identifier,
-        // we initialize the length at -2 and always add 2 during each iteration.
-        size_t currentOptionLength = -2;
+        // Set default to -2 to simplify calculations (add 2 for every identifier (comma and space) instead of checking if this is the last identifier)
+        uint16_t optionLength = -2;
 
         for (const auto& identifier : value)
         {
-            currentOptionLength += identifier.length() + 2;
+            auto length = identifier.length();
+
+            optionLength += length + 2;
+
+            // Add 1 or 2 to account for the dashes in front of the argument
+            optionLength += length > 1 ? 2 : 1;
         }
 
-        argumentLengths[key] = currentOptionLength;
-
-        if (currentOptionLength > longestOption)
-            longestOption = currentOptionLength;
+        if (optionLength > longestOption)
+            longestOption = optionLength;
     }
 
     for (const auto& [key, value] : argumentIdentifiers)
     {
-        // Print the first identifier without a leading comma.
-        // Any additional identifiers will be printed with a preceding comma and space.
-        printf("  ");
-        printf("%s", value[0].c_str());
-
-        for (size_t i = 1; i < value.size(); i++)
+        for (size_t i = 0; i < value.size(); i++)
         {
-            printf(", %s", value[i].c_str());
+            if (i > 0) printf(", ");
+
+            printf("-%c%s", value[i].length() > 1 && '-', value[i].c_str());
         }
 
-        size_t remainingLength = longestOption - argumentLengths.at(key);
-        for (size_t i = 0; i < remainingLength; i++)
-            printf(" ");
-
-        printf("  ");
-
-        printf("%s\n", argumentDescriptions.at(key).c_str());
+        std::cout << std::left << std::setw(longestOption + 2) << argumentDescriptions.at(key) << std::endl;
     }
 }
 
@@ -122,7 +114,10 @@ void ArgumentManager::PrintUsage()
     printf("usage: kole");
     for (const auto& [key, value] : argumentIdentifiers)
     {
-        printf(" [%s]", value[0].c_str());
+        // The arguments in the argument map are sorted so that the first element is always the short-hand, if it has one.
+        // Because of that, we can check if the first element has a length longer than 1 (is long-hand)
+        // and if it is, add an extra '-'.
+        printf(" [-%c%s]", value[0].length() > 1 && '-', value[0].c_str());
     }
     printf("\n");
 }

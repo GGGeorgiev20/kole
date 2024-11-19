@@ -28,7 +28,7 @@ struct BuildConfig
         { "include",          { "include" } },
     };
 
-    std::vector<std::string> exclude;
+    std::vector<std::string> autocreate = { "obj", "bin" };
 
     std::map<std::string, std::string> flags = {
         { "common",       "" },

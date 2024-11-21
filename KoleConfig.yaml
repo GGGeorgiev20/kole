@@ -1,13 +1,11 @@
 output: kole
 extension: none
 
-platform: auto
-
 directories:
-  src: [ src ]
+  src: src
   obj: obj
   bin: bin
-  include: [ include ]
+  include: include
 
 autocreate: [ obj, bin ]
 
@@ -16,7 +14,7 @@ flags:
   windows: -static-libstdc++ -lfmt -lyaml-cpp
   linux: -lm -lpthread -ldl -lrt -lX11 -lfmt -lyaml-cpp
 
-compiler_version: g++
+compiler: g++
 language_version: c++20
 
 optimization: debug

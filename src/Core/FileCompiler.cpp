@@ -54,7 +54,7 @@ void FileCompiler::SetupDirectories()
     }
 }
 
-void FileCompiler::CompileObjectFiles()
+void FileCompiler::CompileObjectFiles(bool rebuild)
 {
     for (const auto& dir : directoriesForCompilation)
     {
@@ -79,9 +79,32 @@ void FileCompiler::CompileObjectFiles()
 
             try
             {
-                const std::string command = buildEngine->GetCompileCommandForFile(sourcePath.string(), sourceFileName, sourceExtension);
+                const std::string outputPath = buildEngine->GetOutputPath(sourceFileName, sourceExtension);
 
-                if (command.empty()) continue;
+                const fs::path outputFile = outputPath;
+
+                // If the rebuild flag is passed, just skip this check
+                if (fs::exists(outputFile) && !rebuild)
+                {
+                    auto sourceLastModified = fs::last_write_time(sourcePath);
+                    auto outputLastModified = fs::last_write_time(outputFile);
+
+                    // Skip compilation if the source file is older than the object file (up-to-date)
+                    if (sourceLastModified <= outputLastModified)
+                    {
+                        Logger::Debug(fmt::format("Skipping {} (up to date)", sourcePath.string()));
+                        continue;
+                    }
+                }
+
+                const std::string command = buildEngine->GetCompileCommandForFile(sourceExtension, sourcePath.string(), outputPath);
+
+                // Safety check
+                if (command.empty())
+                {
+                    Logger::Error(fmt::format("Empty compile command was returned for file {}", sourcePath.string()));
+                    continue;
+                }
 
                 const int exitStatus = system(command.c_str());
 

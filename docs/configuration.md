@@ -5,7 +5,7 @@ This document explains all the available configuration options in `KoleConfig.ya
 ### General Notes:
 - Properties can be set to `'none'`, which makes their value empty.
 - Both `extension` and `platform` can be set to `'auto'`, which will automatically determine the correct value for your operating system.
-- `output`, `platform`, and `compilerVersion` cannot be empty.
+- `output`, `platform`, and `compiler` cannot be empty.
 - Only `gcc` and `g++` are supported for now.
 
 ## General Settings
@@ -61,7 +61,7 @@ This document explains all the available configuration options in `KoleConfig.ya
 
 ## Compiler and Language Versions
 
-### `compilerVersion`
+### `compiler`
 - **Type**: `string`
 - **Default**: `"g++"`
 - **Description**: Specifies the compiler to use. Kole currently supports only `gcc` and `g++`.

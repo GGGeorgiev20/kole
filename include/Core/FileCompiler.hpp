@@ -21,8 +21,10 @@ public:
      *
      * Iterates through configured directories (e.g., 'src') and compiles source
      * files into object files. Includes UI and header files if QT support is enabled.
+     *
+     * @param rebuild Whether to rebuild all files.
      */
-    void CompileObjectFiles();
+    void CompileObjectFiles(bool rebuild);
 
     /**
      * @brief Links object files into a binary executable.

@@ -28,11 +28,6 @@ public:
      */
     void CreateDirectory(std::string directory);
 
-    /**
-     * @brief Clears all files in the object directory.
-     */
-    void ClearObjectDirectory();
-
 private:
     std::shared_ptr<BuildConfig> config;
 };

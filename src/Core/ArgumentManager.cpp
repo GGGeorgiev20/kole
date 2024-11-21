@@ -24,10 +24,10 @@ void ArgumentManager::ProcessArguments()
 
         if (argumentStates.at(Argument::Autorun) == true)
         {
-            argumentsForAutorun += fmt::format("{} ", argument);
+            autorunArguments += fmt::format("{} ", argument);
             continue;
         }
-        
+
         if (argument[0] != '-')
             ArgumentNotFound(argument);
 
@@ -166,18 +166,18 @@ void ArgumentManager::ArgumentNotFound(std::string argument)
     exit(1);
 }
 
-std::string ArgumentManager::GetArgumentsForAutorun()
+std::string ArgumentManager::GetAutorunArguments()
 {
-    if (this->argumentsForAutorun.empty())
+    if (this->autorunArguments.empty())
     {
         Logger::Debug("No arguments for autorun were found");
     }
     else
     {
-        Logger::Debug(fmt::format("Arguments for binary execution: [{}]", this->argumentsForAutorun));
+        Logger::Debug(fmt::format("Arguments for binary execution: [{}]", this->autorunArguments));
     }
 
-    return this->argumentsForAutorun;
+    return this->autorunArguments;
 }
 
 bool ArgumentManager::GetArgumentState(Argument argument)

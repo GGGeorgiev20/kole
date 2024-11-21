@@ -18,7 +18,7 @@ std::unordered_set<std::string> ConfigReader::recognizedKeys = {
     "autocreate",
     "flags",
     "qt_support",
-    "compiler_version",
+    "compiler",
     "language_version",
     "optimization"
 };
@@ -167,10 +167,10 @@ void ConfigReader::ReadConfig()
             }
         }
 
-        if (config["compiler_version"])
+        if (config["compiler"])
         {
-            std::string property = config["compiler_version"].as<std::string>();
-            buildConfig->compilerVersion = ProcessProperty(property);
+            std::string property = config["compiler"].as<std::string>();
+            buildConfig->compiler = ProcessProperty(property);
         }
 
         if (config["language_version"])
@@ -198,7 +198,7 @@ void ConfigReader::PostProcess()
 {
     Logger::Assert("Output name in config can't be empty", !buildConfig->output.empty());
     Logger::Assert("Platform in config can't be empty", !buildConfig->platform.empty());
-    Logger::Assert("Compiler version in config can't be empty", !buildConfig->compilerVersion.empty());
+    Logger::Assert("Compiler version in config can't be empty", !buildConfig->compiler.empty());
 
     if (buildConfig->platform == "auto")
     {

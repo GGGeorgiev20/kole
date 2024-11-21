@@ -16,7 +16,7 @@ BuildEngine::BuildEngine(std::shared_ptr<BuildConfig> config)
     this->config = config;
 }
 
-std::string BuildEngine::GetCompileCommandForFile(std::string sourcePath, std::string sourceFileName, std::string sourceExtension)
+std::string BuildEngine::GetOutputPath(std::string sourceFileName, std::string sourceExtension)
 {
     std::string outputExtension;
     std::string outputDirectory;
@@ -52,21 +52,11 @@ std::string BuildEngine::GetCompileCommandForFile(std::string sourcePath, std::s
         outputExtension
     );
 
-    const fs::path outputFile = outputPath;
+    return outputPath;
+}
 
-    if (fs::exists(outputFile))
-    {
-        auto sourceLastModified = fs::last_write_time(sourcePath);
-        auto outputLastModified = fs::last_write_time(outputFile);
-
-        // Skip compilation if the source file is older than the object file (up-to-date)
-        if (sourceLastModified <= outputLastModified)
-        {
-            Logger::Debug(fmt::format("Skipping {} (up to date)", sourcePath));
-            return "";
-        }
-    }
-
+std::string BuildEngine::GetCompileCommandForFile(std::string sourceExtension, std::string sourcePath, std::string outputPath)
+{
     if (sourceExtension == "cpp" || sourceExtension == "c")
     {
         return GetCompileCommandForSourceFile(sourcePath, outputPath);
@@ -97,7 +87,7 @@ std::string BuildEngine::GetLinkCommandForProject(std::vector<std::string> files
 
     std::string command = fmt::format(
         "{} {} -o {} {}",
-        config->compilerVersion,
+        config->compiler,
         objectFiles,
         output,
         flags
@@ -113,7 +103,7 @@ std::string BuildEngine::GetCompileCommandForSourceFile(std::string source, std:
 
     std::string command = fmt::format(
         "{} {}{} -c {} -o {} {} {}",
-        config->compilerVersion,
+        config->compiler,
         config->languageVersion != "" ? "-std=" : "",
         config->languageVersion,
         source,

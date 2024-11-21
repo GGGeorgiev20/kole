@@ -3,13 +3,13 @@
 #include <iostream>
 #include <map>
 #include <variant>
-#include <vector>
 #include <string>
+#include <array>
 
 enum class Argument
 {
     Help,
-    Clear,
+    Rebuild,
     Autorun,
     Debug,
     Config,
@@ -42,14 +42,14 @@ public:
     /**
      * @brief Prints an error message for unrecognized arguments.
      *
-     * @param argument: The unrecognized argument.
+     * @param argument The unrecognized argument.
      */
     void PrintUnrecognizedArgument(std::string argument);
 
     /**
      * @brief Prints usage, unrecognized argument and exits.
      *
-     * @param argument: The unrecognized argument.
+     * @param argument The unrecognized argument.
      */
     void ArgumentNotFound(std::string argument);
 
@@ -58,12 +58,12 @@ public:
      *
      * @return The string of arguments meant for autorun, or an empty string if none were found.
      */
-    std::string GetArgumentsForAutorun();
+    std::string GetAutorunArguments();
 
     /**
      * @brief Checks the boolean state of a specific argument.
      *
-     * @param argument: The argument to check.
+     * @param argument The argument to check.
      * @return The boolean state of the argument.
      */
     bool GetArgumentState(Argument argument);
@@ -74,32 +74,32 @@ private:
 
     const std::string description = "Build system for compiling and running C++ projects.";
 
-    std::string argumentsForAutorun = "";
+    std::string autorunArguments = "";
 
     // Map of arguments and their possible identifiers (flags)
-    const std::map<Argument, std::vector<std::string>> argumentIdentifiers = {
+    const std::map<Argument, std::array<std::string, 2>> argumentIdentifiers = {
         { Argument::Help,              { "h", "help" }    },
-        { Argument::Clear,             { "c", "clear" }   },
-        { Argument::Autorun,           { "r", "autorun" } },
+        { Argument::Rebuild,           { "r", "rebuild" } },
+        { Argument::Autorun,           { "a", "autorun" } },
         { Argument::Debug,             { "d", "debug" }   },
-        { Argument::Config,            { "g", "config" }  },
+        { Argument::Config,            { "c", "config" }  },
         { Argument::Initialize,        { "i", "init" }    },
     };
 
     // Map of arguments and their descriptions
     const std::map<Argument, std::string> argumentDescriptions = {
-        { Argument::Help,              "Show this help message and exit"              },
-        { Argument::Clear,             "Clear all object files before building"       },
-        { Argument::Autorun,           "Autorun the compiled binary after building"   },
-        { Argument::Debug,             "Show logs used for debugging"                 },
-        { Argument::Config,            "Create a default config if one doesn't exist" },
-        { Argument::Initialize,        "Initializes an empty project"                 },
+        { Argument::Help,              "Display this help message and exit"    },
+        { Argument::Rebuild,           "Rebuild all object files"              },
+        { Argument::Autorun,           "Run the compiled binary automatically" },
+        { Argument::Debug,             "Enable debugging logs"                 },
+        { Argument::Config,            "Generate a default config if missing"  },
+        { Argument::Initialize,        "Sets up an empty project"              },
     };
 
     // Map to track the state (whether the argument was provided or not)
     std::map<Argument, bool> argumentStates = {
         { Argument::Help,              false },
-        { Argument::Clear,             false },
+        { Argument::Rebuild,           false },
         { Argument::Autorun,           false },
         { Argument::Debug,             false },
         { Argument::Config,            false },

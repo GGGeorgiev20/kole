@@ -10,18 +10,31 @@ public:
     BuildEngine(std::shared_ptr<BuildConfig> config);
 
     /**
+     * @brief Generates the output path, given a source file.
+     *
+     * Constructs the output path for a file depending on its' file name and extension.
+     * Supports source, header and UI files.
+     *
+     * @param sourceFileName The source file name.
+     * @param sourceExtension The source file extension.
+     *
+     * @return The respective output path.
+     */
+    std::string GetOutputPath(std::string sourceFileName, std::string sourceExtension);
+
+    /**
      * @brief Generates the command to compile a file.
      *
      * Constructs the compile command for a file depending on its' extension.
      * Supports source, header and UI files.
      *
-     * @param sourcePath: The source file path.
-     * @param sourceFileName: The source file name.
-     * @param sourceExtension: The source file extension.
+     * @param sourceExtension The source file extension.
+     * @param sourcePath The source file path.
+     * @param outputPath The output file path.
      *
      * @return The formatted compile command.
      */
-    std::string GetCompileCommandForFile(std::string sourcePath, std::string sourceFileName, std::string sourceExtension);
+    std::string GetCompileCommandForFile(std::string sourceExtension, std::string sourcePath, std::string outputPath);
 
     /**
      * @brief Generates the command to link object files into a final binary.
@@ -29,8 +42,8 @@ public:
      * Constructs the link command using the compiler version, flags, object files,
      * and output binary name.
      *
-     * @param files: Vector of object files to link.
-     * @param output: The output binary name.
+     * @param files Vector of object files to link.
+     * @param output The output binary name.
      *
      * @return The formatted link command.
      */
@@ -39,8 +52,8 @@ public:
     /**
      * @brief Generates the command to compile a source file to an object file.
      *
-     * @param source: The source file to compile.
-     * @param object: The output file path.
+     * @param source The source file to compile.
+     * @param object The output file path.
      *
      * @return The formatted compile command.
      */
@@ -49,8 +62,8 @@ public:
     /**
      * @brief Generates the command to compile a header file to a moc file.
      *
-     * @param source: The source file to compile.
-     * @param object: The output file path.
+     * @param source The source file to compile.
+     * @param object The output file path.
      *
      * @return The formatted compile command.
      */
@@ -59,8 +72,8 @@ public:
     /**
      * @brief Generates the command to compile a UI file to a UI header file.
      *
-     * @param source: The source file to compile.
-     * @param object: The output file path.
+     * @param source The source file to compile.
+     * @param object The output file path.
      *
      * @return The formatted compile command.
      */

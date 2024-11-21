@@ -51,7 +51,7 @@ struct BuildConfig
         { "moc_prefix",         "moc_"  },
     };
 
-    std::string compilerVersion = "g++";
+    std::string compiler = "g++";
     std::string languageVersion = "c++17";
 
     std::string optimization = "debug";

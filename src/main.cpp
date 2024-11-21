@@ -29,14 +29,13 @@ int main(int argc, char** argv)
     if (argumentManager->GetArgumentState(Argument::Config) || argumentManager->GetArgumentState(Argument::Initialize))
         return 0;
 
-    if (argumentManager->GetArgumentState(Argument::Clear))
-        directoryManager->ClearObjectDirectory();
-
     std::shared_ptr<FileCompiler> fileCompiler = std::make_shared<FileCompiler>(config);
 
-    fileCompiler->CompileObjectFiles();
+    bool rebuild = argumentManager->GetArgumentState(Argument::Rebuild);
+
+    fileCompiler->CompileObjectFiles(rebuild);
     fileCompiler->LinkObjectFiles();
 
     if (argumentManager->GetArgumentState(Argument::Autorun))
-        fileCompiler->RunBinaryExecutable(argumentManager->GetArgumentsForAutorun());
+        fileCompiler->RunBinaryExecutable(argumentManager->GetAutorunArguments());
 }

@@ -12,8 +12,6 @@ ArgumentManager::ArgumentManager(int argc, char** argv)
 
 void ArgumentManager::ProcessArguments()
 {
-    // TODO: Fix arguments. Very bugged.
-
     // Skip the first argument, as it's the name of the executable
     for (int i = 1; i < argc; i++)
     {

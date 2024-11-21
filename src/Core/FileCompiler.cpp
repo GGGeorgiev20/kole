@@ -3,9 +3,8 @@
 
 #include <algorithm>
 #include <fmt/core.h>
-#include <filesystem>
 
-namespace fs = std::filesystem;
+#include "Utils/RegexHelper.hpp"
 
 FileCompiler::FileCompiler(std::shared_ptr<BuildConfig> config)
 {
@@ -27,7 +26,7 @@ void FileCompiler::SetupDirectories()
         tempDirs.insert(tempDirs.end(), dirs.begin(), dirs.end());
     };
 
-    // UI and headers need to be added to the array first so that they're also
+    // UI and headers need to be added to the array first so that they're
     // compiled first. This is because these files need to be included
     // and so source files won't compile without them.
 
@@ -44,7 +43,7 @@ void FileCompiler::SetupDirectories()
 
     AddDirsFromConfig(config->directories.at("src"));
 
-    // Remove duplicates using a set
+    // Remove duplicates
     for (const auto& dir : tempDirs)
     {
         if (std::find(this->directoriesForCompilation.begin(), this->directoriesForCompilation.end(), dir) == this->directoriesForCompilation.end())
@@ -60,65 +59,85 @@ void FileCompiler::CompileObjectFiles(bool rebuild)
     {
         const fs::path dirPath = dir;
 
+        if (RegexHelper::MatchesRegex(dirPath, config->exclude)) {
+            Logger::Info(fmt::format("Skipping excluded directory '{}'", dirPath.string()));
+            continue;
+        }
+
         if (fs::is_empty(dirPath))
         {
             Logger::Warning(fmt::format("Source directory '{}' is empty. No files to process, skipping...", dir));
             continue;
         }
 
-        for (const auto& entry : fs::recursive_directory_iterator(dirPath))
-        {
+        for (auto it = fs::recursive_directory_iterator(dirPath); it != fs::recursive_directory_iterator(); ++it) {
+            const fs::directory_entry& entry = *it;
+            const fs::path sourcePath = entry.path();
+
+            if (RegexHelper::MatchesRegex(sourcePath, config->exclude)) {
+                Logger::Info(fmt::format("Skipping excluded '{}'", sourcePath.string()));
+
+                // If it's a directory, skip recursion into it
+                if (fs::is_directory(sourcePath)) {
+                    it.disable_recursion_pending();
+                }
+                continue;
+            }
+
             if (!fs::is_regular_file(entry))
                 continue;
 
-            const fs::path sourcePath = entry.path();
+            this->CompileObjectFile(sourcePath, rebuild);
 
-            // Get filename without path
-            const std::string sourceFileName = sourcePath.stem().string();
-            const std::string sourceExtension = sourcePath.extension().string().substr(1);
-
-            try
-            {
-                const std::string outputPath = buildEngine->GetOutputPath(sourceFileName, sourceExtension);
-
-                const fs::path outputFile = outputPath;
-
-                // If the rebuild flag is passed, just skip this check
-                if (fs::exists(outputFile) && !rebuild)
-                {
-                    auto sourceLastModified = fs::last_write_time(sourcePath);
-                    auto outputLastModified = fs::last_write_time(outputFile);
-
-                    // Skip compilation if the source file is older than the object file (up-to-date)
-                    if (sourceLastModified <= outputLastModified)
-                    {
-                        Logger::Debug(fmt::format("Skipping {} (up to date)", sourcePath.string()));
-                        continue;
-                    }
-                }
-
-                const std::string command = buildEngine->GetCompileCommandForFile(sourceExtension, sourcePath.string(), outputPath);
-
-                // Safety check
-                if (command.empty())
-                {
-                    Logger::Error(fmt::format("Empty compile command was returned for file {}", sourcePath.string()));
-                    continue;
-                }
-
-                const int exitStatus = system(command.c_str());
-
-                if (exitStatus != 0)
-                    throw std::runtime_error(command);
-            }
-            catch (const std::runtime_error& command)
-            {
-                Logger::Error(fmt::format("Failed to compile '{}'", sourcePath.string()));
-                Logger::Fatal(fmt::format("Command: {}", command.what()));
-            }
-
-            Logger::Info(fmt::format("Compiled {}", sourcePath.string()));
+            Logger::Info(fmt::format("Compiled '{}'", sourcePath.string()));
         }
+    }
+}
+
+void FileCompiler::CompileObjectFile(fs::path sourcePath, bool rebuild)
+{
+    // Get filename without path
+    const std::string sourceFileName = sourcePath.stem().string();
+    const std::string sourceExtension = sourcePath.extension().string().substr(1);
+
+    try
+    {
+        const std::string outputPath = buildEngine->GetOutputPath(sourceFileName, sourceExtension);
+
+        const fs::path outputFile = outputPath;
+
+        // If the rebuild flag is passed, just skip this check
+        if (fs::exists(outputFile) && !rebuild)
+        {
+            auto sourceLastModified = fs::last_write_time(sourcePath);
+            auto outputLastModified = fs::last_write_time(outputFile);
+
+            // Skip compilation if the source file is older than the object file (up-to-date)
+            if (sourceLastModified <= outputLastModified)
+            {
+                Logger::Debug(fmt::format("Skipping {} (up to date)", sourcePath.string()));
+                return;
+            }
+        }
+
+        const std::string command = buildEngine->GetCompileCommandForFile(sourceExtension, sourcePath.string(), outputPath);
+
+        // Safety check
+        if (command.empty())
+        {
+            Logger::Error(fmt::format("Empty compile command was returned for file {}", sourcePath.string()));
+            return;
+        }
+
+        const int exitStatus = system(command.c_str());
+
+        if (exitStatus != 0)
+            throw std::runtime_error(command);
+    }
+    catch (const std::runtime_error& command)
+    {
+        Logger::Error(fmt::format("Failed to compile '{}'", sourcePath.string()));
+        Logger::Fatal(fmt::format("Command: {}", command.what()));
     }
 }
 
@@ -170,7 +189,7 @@ void FileCompiler::LinkObjectFiles()
 
 void FileCompiler::RunBinaryExecutable(std::string arguments)
 {
-    Logger::Assert("Binary executable wasn't found when trying to run it. Something has gone wrong", !output.empty());
+    Logger::Assert(!output.empty(), "Binary executable wasn't found when trying to run it. Something has gone wrong");
 
     printf("\n");
     if (arguments.empty())

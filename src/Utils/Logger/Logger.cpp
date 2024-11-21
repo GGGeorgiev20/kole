@@ -4,8 +4,8 @@ using namespace Logger;
 
 void Logger::Log(LogTypes::LogType type, std::string message)
 {
-    // Fatal can't be stopped from logging
-    if (!LogTypes::LogTypeStatuses[type] && type != LogTypes::LogType::Fatal)
+    // Fatal and Assert can't be stopped from logging
+    if (!LogTypes::LogTypeStatuses[type] && type != LogTypes::LogType::Fatal && type != LogTypes::LogType::Assert)
         return;
 
     printf("%s: %s\n", LogTypes::LogTypePrefixes[type].c_str(), message.c_str());
@@ -38,20 +38,11 @@ void Logger::Fatal(std::string message)
     exit(1);
 }
 
-void Logger::AssertLog(std::string message)
+void Logger::Assert(bool condition, std::string message)
 {
+    if (condition) return;
+
     Log(LogTypes::LogType::Assert, message);
     Log(LogTypes::LogType::Assert, "Exiting program...");
     exit(1);
-}
-
-void Logger::Assert(std::string message, bool condition, bool isFatal)
-{
-    if (condition)
-        return;
-
-    if (isFatal)
-        AssertLog(message);
-    else
-        Error(message);
 }

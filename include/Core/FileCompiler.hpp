@@ -1,7 +1,11 @@
 #pragma once
 
+#include <filesystem>
+
 #include "Core/BuildEngine.hpp"
 #include "Core/ConfigReader.hpp"
+
+namespace fs = std::filesystem;
 
 class FileCompiler
 {
@@ -19,12 +23,23 @@ public:
     /**
      * @brief Compiles source files to object files.
      *
-     * Iterates through configured directories (e.g., 'src') and compiles source
-     * files into object files. Includes UI and header files if QT support is enabled.
+     * Iterates through configured directories (e.g., 'src')
+     * and calls the compile object file function for each one.
      *
      * @param rebuild Whether to rebuild all files.
      */
     void CompileObjectFiles(bool rebuild);
+
+    /**
+     * @brief Compiles a source file to an object file.
+     *
+     * Compiles source files into object files.
+     * Includes UI and header files if QT support is enabled.
+     *
+     * @param sourcePath The path to the source file.
+     * @param rebuild Whether to rebuild the file.
+     */
+    void CompileObjectFile(fs::path sourcePath, bool rebuild);
 
     /**
      * @brief Links object files into a binary executable.

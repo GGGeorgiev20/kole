@@ -3,7 +3,7 @@
 #include "Core/FileCompiler.hpp"
 
 #include "Core/ConfigReader.hpp"
-#include "Utils/Logger/LogTypes.hpp"
+#include "Utils/Logger/Logger.hpp"
 
 int main(int argc, char** argv)
 {
@@ -32,6 +32,8 @@ int main(int argc, char** argv)
     std::shared_ptr<FileCompiler> fileCompiler = std::make_shared<FileCompiler>(config);
 
     bool rebuild = argumentManager->GetArgumentState(Argument::Rebuild);
+    if (rebuild)
+        Logger::Info("Rebuilding all files...");
 
     fileCompiler->CompileObjectFiles(rebuild);
     fileCompiler->LinkObjectFiles();

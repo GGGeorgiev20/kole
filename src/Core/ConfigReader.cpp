@@ -16,6 +16,7 @@ std::unordered_set<std::string> ConfigReader::recognizedKeys = {
     "platform",
     "directories",
     "autocreate",
+    "exclude",
     "flags",
     "qt_support",
     "compiler",
@@ -135,6 +136,17 @@ void ConfigReader::ReadConfig()
             }
         }
 
+        if (config["exclude"])
+        {
+            const auto& excluded = config["exclude"];
+
+            for (const auto& exclude : excluded)
+            {
+                std::string value = exclude.as<std::string>();
+                buildConfig->exclude.push_back(ProcessProperty(value));
+            }
+        }
+
         if (config["flags"])
         {
             const auto& flags = config["flags"];
@@ -196,9 +208,9 @@ void ConfigReader::ReadConfig()
 
 void ConfigReader::PostProcess()
 {
-    Logger::Assert("Output name in config can't be empty", !buildConfig->output.empty());
-    Logger::Assert("Platform in config can't be empty", !buildConfig->platform.empty());
-    Logger::Assert("Compiler version in config can't be empty", !buildConfig->compiler.empty());
+    Logger::Assert(!buildConfig->output.empty(), "Output name in config can't be empty");
+    Logger::Assert(!buildConfig->platform.empty(), "Platform in config can't be empty");
+    Logger::Assert(!buildConfig->compiler.empty(), "Compiler version in config can't be empty");
 
     if (buildConfig->platform == "auto")
     {

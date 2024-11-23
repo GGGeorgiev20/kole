@@ -8,7 +8,6 @@ directories:
   include: include
 
 autocreate: [ obj, bin ]
-exclude: [ src/Utils/Logger/LogTypes.cpp ]
 
 flags:
   common: -Wall -Wunused-variable -Wextra -Wno-enum-compare -g -ggdb -fdiagnostics-color=always

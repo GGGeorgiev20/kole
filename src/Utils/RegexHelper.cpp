@@ -25,7 +25,11 @@ bool RegexHelper::MatchesRegex(const std::string& string, const std::vector<std:
     {
         try
         {
-            std::string regexPattern = ConvertPatternToRegex(excludePattern);
+            bool patternConverted = convertedPatterns.find(excludePattern) != convertedPatterns.end();
+            std::cout << "Pattern already converted: " << patternConverted << std::endl;
+
+            std::string regexPattern = patternConverted ? convertedPatterns.at(excludePattern) : ConvertPatternToRegex(excludePattern);
+
             std::regex patternRegex(regexPattern, std::regex_constants::ECMAScript | std::regex_constants::icase);
 
             if (std::regex_match(string, patternRegex))
@@ -46,7 +50,9 @@ bool RegexHelper::MatchesRegex(const std::string& string, const std::vector<std:
 bool RegexHelper::MatchesRegex(const fs::path& path, const std::vector<std::string>& pattern)
 {
     std::string pathStr = path.generic_string();
-    std::cout << pathStr << std::endl;
-    std::cout << pattern << std::endl;
     return MatchesRegex(pathStr, pattern);
 }
+
+// NAMESPACE VARIABLES
+
+std::unordered_map<std::string, std::string> RegexHelper::convertedPatterns;

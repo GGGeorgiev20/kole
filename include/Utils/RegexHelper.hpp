@@ -2,8 +2,8 @@
 
 #include <regex>
 #include <string>
-#include <vector>
 #include <filesystem>
+#include <unordered_map>
 
 #include "Utils/Logger/Logger.hpp"
 
@@ -18,4 +18,8 @@ namespace RegexHelper
     bool MatchesRegex(const std::string& string, const std::vector<std::string>& pattern);
 
     bool MatchesRegex(const fs::path& path, const std::vector<std::string>& pattern);
+
+    // NAMESPACE VARIABLES
+    
+    extern std::unordered_map<std::string, std::string> convertedPatterns;
 }

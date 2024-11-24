@@ -2,31 +2,16 @@
 #include "Utils/Logger/Logger.hpp"
 
 #include <fstream>
+#include <algorithm>
 #include <filesystem>
 
 namespace fs = std::filesystem;
 
-std::string ConfigReader::configPath = "./KoleConfig.yaml";
-std::shared_ptr<BuildConfig> ConfigReader::buildConfig = nullptr;
-
-// Set of recognized top-level keys in the YAML config
-std::unordered_set<std::string> ConfigReader::recognizedKeys = {
-    "output",
-    "extension",
-    "platform",
-    "directories",
-    "autocreate",
-    "exclude",
-    "flags",
-    "qt_support",
-    "compiler",
-    "language_version",
-    "optimization"
-};
+std::shared_ptr<ConfigReader> ConfigReader::m_instance = nullptr;
 
 void ConfigReader::CreateConfig()
 {
-    if (fs::exists(configPath))
+    if (fs::exists(m_configPath))
     {
         Logger::Warning("The config flag was specified, but a config file already exists");
         return;
@@ -34,17 +19,18 @@ void ConfigReader::CreateConfig()
 
     try
     {
-        std::ofstream configFile(configPath);
+        std::ofstream configFile(m_configPath);
         if (!configFile.is_open())
         {
-            Logger::Error(fmt::format("Failed to open config file at '{}'", configPath));
+            Logger::Error(fmt::format("Failed to open config file at '{}'", m_configPath));
             return;
         }
 
-        configFile << defaultConfig;
+        // TODO: Remake this to use a file from the 'assets' folder
+        // configFile << m_defaultConfig;
         configFile.close();
 
-        Logger::Info(fmt::format("Successfully created config file at '{}'", configPath));
+        Logger::Info(fmt::format("Successfully created config file at '{}'", m_configPath));
     }
     catch (const std::exception& e)
     {
@@ -54,9 +40,9 @@ void ConfigReader::CreateConfig()
 
 void ConfigReader::ReadConfig()
 {
-    buildConfig = std::make_shared<BuildConfig>();
+    m_buildConfig = std::make_shared<BuildConfig>();
 
-    if (!std::filesystem::exists(configPath))
+    if (!std::filesystem::exists(m_configPath))
     {
         Logger::Info("Config file doesn't exist. Using default values");
         return;
@@ -64,16 +50,16 @@ void ConfigReader::ReadConfig()
 
     try
     {
-        YAML::Node config = YAML::LoadFile(configPath);
+        YAML::Node config = YAML::LoadFile(m_configPath);
 
         // Check for unrecognized properties
         for (const auto& property : config)
         {
             std::string key = property.first.as<std::string>();
 
-            if (recognizedKeys.find(key) == recognizedKeys.end())
+            if (std::find(m_recognizedKeys.begin(), m_recognizedKeys.end(), key) == m_recognizedKeys.end())
             {
-                Logger::Warning(fmt::format("Property '{}' was not recognized. Ignoring...", key));
+                Logger::Warning(fmt::format("Property '{}' was not recognized in the configuration. Ignoring...", key));
             }
         }
 
@@ -82,19 +68,19 @@ void ConfigReader::ReadConfig()
         if (config["output"])
         {
             std::string property = config["output"].as<std::string>();
-            buildConfig->output = ProcessProperty(property);
+            m_buildConfig->output = ProcessProperty(property);
         }
 
         if (config["extension"])
         {
             std::string property = config["extension"].as<std::string>();
-            buildConfig->extension = ProcessProperty(property);
+            m_buildConfig->extension = ProcessProperty(property);
         }
 
         if (config["platform"])
         {
             std::string property = config["platform"].as<std::string>();
-            buildConfig->platform = ProcessProperty(property);
+            m_buildConfig->platform = ProcessProperty(property);
         }
 
         if (config["directories"])
@@ -106,7 +92,7 @@ void ConfigReader::ReadConfig()
                 std::string key = dir.first.as<std::string>();
 
                 // If a directory isn't recognized in the config property, ignore it and warn the user
-                if (buildConfig->directories.count(key) == 0)
+                if (!m_buildConfig->directories.contains(key))
                 {
                     Logger::Warning(fmt::format("Directory '{}' was not recognized. Ignoring...", key));
                     continue;
@@ -115,12 +101,12 @@ void ConfigReader::ReadConfig()
                 if (dir.second.IsSequence())
                 {
                     std::vector<std::string> value = dir.second.as<std::vector<std::string>>();
-                    buildConfig->directories[key] = ProcessProperty(value);
+                    m_buildConfig->directories[key] = ProcessProperty(value);
                 }
                 else if (dir.second.IsScalar())
                 {
                     std::string value = dir.second.as<std::string>();
-                    buildConfig->directories[key] = { ProcessProperty(value) };
+                    m_buildConfig->directories[key] = { ProcessProperty(value) };
                 }
             }
         }
@@ -132,7 +118,7 @@ void ConfigReader::ReadConfig()
             for (const auto& autocreate : autocreated)
             {
                 std::string value = autocreate.as<std::string>();
-                buildConfig->autocreate.push_back(ProcessProperty(value));
+                m_buildConfig->autocreate.push_back(ProcessProperty(value));
             }
         }
 
@@ -143,7 +129,7 @@ void ConfigReader::ReadConfig()
             for (const auto& exclude : excluded)
             {
                 std::string value = exclude.as<std::string>();
-                buildConfig->exclude.push_back(ProcessProperty(value));
+                m_buildConfig->exclude.push_back(ProcessProperty(value));
             }
         }
 
@@ -156,10 +142,13 @@ void ConfigReader::ReadConfig()
                 std::string key = flag.first.as<std::string>();
                 std::string value = flag.second.as<std::string>();
 
-                if (buildConfig->flags.count(key) > 0)
-                    buildConfig->flags[key] = ProcessProperty(value);
-                else
+                if (!m_buildConfig->flags.contains(key))
+                {
                     Logger::Warning(fmt::format("Flag '{}' was not recognized. Ignoring...", key));
+                    continue;
+                }
+
+                m_buildConfig->flags[key] = ProcessProperty(value);
             }
         }
 
@@ -172,93 +161,97 @@ void ConfigReader::ReadConfig()
                 std::string key = property.first.as<std::string>();
                 std::string value = property.second.as<std::string>();
 
-                if (buildConfig->qtSupport.count(key) > 0)
-                    buildConfig->qtSupport[key] = ProcessProperty(value);
-                else
+                if (!m_buildConfig->qtSupport.contains(key))
+                {
                     Logger::Warning(fmt::format("QT Support property '{}' was not recognized. Ignoring...", key));
+                    continue;
+                }
+
+                m_buildConfig->qtSupport[key] = ProcessProperty(value);
             }
         }
 
         if (config["compiler"])
         {
             std::string property = config["compiler"].as<std::string>();
-            buildConfig->compiler = ProcessProperty(property);
+            m_buildConfig->compiler = ProcessProperty(property);
         }
 
         if (config["language_version"])
         {
             std::string property = config["language_version"].as<std::string>();
-            buildConfig->languageVersion = ProcessProperty(property);
+            m_buildConfig->languageVersion = ProcessProperty(property);
         }
 
         if (config["optimization"])
         {
             std::string property = config["optimization"].as<std::string>();
-            buildConfig->optimization = ProcessProperty(property);
+            m_buildConfig->optimization = ProcessProperty(property);
         }
 
-        Logger::Info("Successfully read config file");
+        Logger::Debug("Successfully read config file");
     }
     catch (const YAML::Exception& e)
     {
-        Logger::Debug(e.what());
-        Logger::Fatal("Couldn't read config file. Aborting...");
+        Logger::Error(fmt::format("Failed when parsing config file '{}': {}", m_configPath, e.what()));
+        Logger::Info("Using default configuration values.");
     }
 }
 
 void ConfigReader::PostProcess()
 {
-    Logger::Assert(!buildConfig->output.empty(), "Output name in config can't be empty");
-    Logger::Assert(!buildConfig->platform.empty(), "Platform in config can't be empty");
-    Logger::Assert(!buildConfig->compiler.empty(), "Compiler version in config can't be empty");
+    Logger::Assert(!m_buildConfig->output.empty(), "Output name in config can't be empty");
+    Logger::Assert(!m_buildConfig->platform.empty(), "Platform in config can't be empty");
+    Logger::Assert(!m_buildConfig->compiler.empty(), "Compiler version in config can't be empty");
 
-    if (buildConfig->platform == "auto")
+    if (m_buildConfig->platform == ConfigConstants::AUTO)
     {
-        buildConfig->platform = Platform::GetPlatform();
+        m_buildConfig->platform = Platform::GetPlatform();
     }
     else
     {
-        Platform::SetPlatform(buildConfig->platform);
+        Platform::SetPlatform(m_buildConfig->platform);
     }
 
     // NOTE: The extension check needs to be after the platform,
     // or else the extension will be calculated for the user's os
-    if (buildConfig->extension == "auto")
+    if (m_buildConfig->extension == ConfigConstants::AUTO)
     {
-        buildConfig->extension = Platform::GetOutputExtension();
+        m_buildConfig->extension = Platform::GetOutputExtension();
     }
 
-    const std::string compileUi = buildConfig->qtSupport.at("compile_ui");
-    const std::string uiExtension = buildConfig->qtSupport.at("ui_extension");
+    const std::string compileUi = m_buildConfig->qtSupport.at("compile_ui");
+    const std::string uiExtension = m_buildConfig->qtSupport.at("ui_extension");
 
-    if (compileUi == "true" && uiExtension != "hpp" && uiExtension != "h")
+    if (compileUi == ConfigConstants::TRUE && uiExtension != "hpp" && uiExtension != "h")
     {
         Logger::Warning(fmt::format("UI extension '{}' is not valid and may cause issues.", uiExtension));
     }
 }
 
-std::string ConfigReader::ProcessProperty(std::string property)
+std::string ConfigReader::ProcessProperty(const std::string& property)
 {
-    std::string propertyLowercase = property;
-    transform(propertyLowercase.begin(), propertyLowercase.end(), propertyLowercase.begin(), ::tolower);
+    // The reason I create a copy instead of simply passing by value is that I want to convert it to lowercase.
+    // Then I return the original value (in most cases), and so it must be preserved.
+    std::string copy = property;
+    transform(copy.begin(), copy.end(), copy.begin(), ::tolower);
 
-    if (propertyLowercase == "none")
+    if (copy == "none")
         return "";
 
     return property;
 }
 
-std::vector<std::string> ConfigReader::ProcessProperty(std::vector<std::string> properties)
+std::vector<std::string> ConfigReader::ProcessProperty(const std::vector<std::string>& properties)
 {
     std::vector<std::string> result;
     result.reserve(properties.size());
 
-    for (const auto& property : properties)
+    for (auto property : properties)
     {
-        std::string propertyLowercase = property;
-        transform(propertyLowercase.begin(), propertyLowercase.end(), propertyLowercase.begin(), ::tolower);
+        transform(property.begin(), property.end(), property.begin(), ::tolower);
 
-        if (propertyLowercase != "none")
+        if (property != "none")
         {
             result.push_back(property);
         }
@@ -269,8 +262,8 @@ std::vector<std::string> ConfigReader::ProcessProperty(std::vector<std::string> 
 
 std::shared_ptr<BuildConfig> ConfigReader::GetBuildConfig()
 {
-    if (buildConfig == nullptr)
+    if (m_buildConfig == nullptr)
         ReadConfig();
 
-    return buildConfig;
+    return m_buildConfig;
 }

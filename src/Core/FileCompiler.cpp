@@ -6,14 +6,6 @@
 
 #include "Utils/RegexHelper.hpp"
 
-FileCompiler::FileCompiler(std::shared_ptr<BuildConfig> config)
-{
-    this->config = config;
-    this->buildEngine = std::make_shared<BuildEngine>(config);
-
-    this->SetupDirectories();
-}
-
 void FileCompiler::SetupDirectories()
 {
     std::vector<std::string> tempDirs;
@@ -30,36 +22,35 @@ void FileCompiler::SetupDirectories()
     // compiled first. This is because these files need to be included
     // and so source files won't compile without them.
 
-    // I know this is fucking awful. For details, please check ConfigReader.hpp
-    if (config->qtSupport.at("compile_ui") == "true")
+    if (m_config->qtSupport.at("compile_ui") == ConfigConstants::TRUE)
     {
-        AddDirsFromConfig(config->directories.at("ui"));
+        AddDirsFromConfig(m_config->directories.at("ui"));
     }
 
-    if (config->qtSupport.at("compile_moc") == "true")
+    if (m_config->qtSupport.at("compile_moc") == ConfigConstants::TRUE)
     {
-        AddDirsFromConfig(config->directories.at("include"));
+        AddDirsFromConfig(m_config->directories.at("include"));
     }
 
-    AddDirsFromConfig(config->directories.at("src"));
+    AddDirsFromConfig(m_config->directories.at("src"));
 
     // Remove duplicates
     for (const auto& dir : tempDirs)
     {
-        if (std::find(this->directoriesForCompilation.begin(), this->directoriesForCompilation.end(), dir) == this->directoriesForCompilation.end())
+        if (std::find(m_directoriesForCompilation.begin(), m_directoriesForCompilation.end(), dir) == m_directoriesForCompilation.end())
         {
-            this->directoriesForCompilation.push_back(dir);
+            m_directoriesForCompilation.push_back(dir);
         }
     }
 }
 
 void FileCompiler::CompileObjectFiles(bool rebuild)
 {
-    for (const auto& dir : directoriesForCompilation)
+    for (const auto& dir : m_directoriesForCompilation)
     {
         const fs::path dirPath = dir;
 
-        if (RegexHelper::MatchesRegex(dirPath, config->exclude)) {
+        if (RegexHelper::MatchesRegex(dirPath, m_config->exclude)) {
             Logger::Info(fmt::format("Skipping excluded directory '{}'", dirPath.string()));
             continue;
         }
@@ -74,7 +65,7 @@ void FileCompiler::CompileObjectFiles(bool rebuild)
             const fs::directory_entry& entry = *it;
             const fs::path sourcePath = entry.path();
 
-            if (RegexHelper::MatchesRegex(sourcePath, config->exclude)) {
+            if (RegexHelper::MatchesRegex(sourcePath, m_config->exclude)) {
                 Logger::Info(fmt::format("Skipping excluded '{}'", sourcePath.string()));
 
                 // If it's a directory, skip recursion into it
@@ -89,12 +80,12 @@ void FileCompiler::CompileObjectFiles(bool rebuild)
 
             this->CompileObjectFile(sourcePath, rebuild);
 
-            Logger::Info(fmt::format("Compiled '{}'", sourcePath.string()));
+            Logger::Info(fmt::format("Compiled {}", sourcePath.string()));
         }
     }
 }
 
-void FileCompiler::CompileObjectFile(fs::path sourcePath, bool rebuild)
+void FileCompiler::CompileObjectFile(const fs::path& sourcePath, bool rebuild)
 {
     // Get filename without path
     const std::string sourceFileName = sourcePath.stem().string();
@@ -102,7 +93,13 @@ void FileCompiler::CompileObjectFile(fs::path sourcePath, bool rebuild)
 
     try
     {
-        const std::string outputPath = buildEngine->GetOutputPath(sourceFileName, sourceExtension);
+        const std::string outputPath = m_buildEngine->GetOutputPath(sourceFileName, sourceExtension);
+
+        if (outputPath == "")
+        {
+            Logger::Warning(fmt::format("Skipping compilation of file '{}'", sourcePath.string()));
+            return;
+        }
 
         const fs::path outputFile = outputPath;
 
@@ -120,7 +117,7 @@ void FileCompiler::CompileObjectFile(fs::path sourcePath, bool rebuild)
             }
         }
 
-        const std::string command = buildEngine->GetCompileCommandForFile(sourceExtension, sourcePath.string(), outputPath);
+        const std::string command = m_buildEngine->GetCompileCommandForFile(sourceExtension, sourcePath.string(), outputPath);
 
         // Safety check
         if (command.empty())
@@ -143,7 +140,7 @@ void FileCompiler::CompileObjectFile(fs::path sourcePath, bool rebuild)
 
 void FileCompiler::LinkObjectFiles()
 {
-    const fs::path objPath = config->directories.at("obj")[0];
+    const fs::path objPath = m_config->directories.at("obj")[0];
 
     if (fs::is_empty(objPath))
     {
@@ -161,17 +158,17 @@ void FileCompiler::LinkObjectFiles()
         objects.push_back(filePath);
     }
 
-    this->output = fmt::format(
+    m_output = fmt::format(
         "{}/{}{}{}",
-        config->directories.at("bin")[0],
-        config->output,
-        config->extension != "" ? "." : "",
-        config->extension
+        m_config->directories.at("bin")[0],
+        m_config->output,
+        m_config->extension != "" ? "." : "",
+        m_config->extension
     );
 
     try
     {
-        const std::string command = buildEngine->GetLinkCommandForProject(objects, output);
+        const std::string command = m_buildEngine->GetLinkCommandForProject(objects, m_output);
 
         const int exitStatus = system(command.c_str());
 
@@ -187,9 +184,9 @@ void FileCompiler::LinkObjectFiles()
     Logger::Info("Build successful");
 }
 
-void FileCompiler::RunBinaryExecutable(std::string arguments)
+void FileCompiler::RunBinaryExecutable(const std::string& arguments)
 {
-    Logger::Assert(!output.empty(), "Binary executable wasn't found when trying to run it. Something has gone wrong");
+    Logger::Assert(!m_output.empty(), "Binary executable wasn't found when trying to run it. Something has gone wrong");
 
     printf("\n");
     if (arguments.empty())
@@ -199,7 +196,7 @@ void FileCompiler::RunBinaryExecutable(std::string arguments)
 
     try
     {
-        std::string command = fmt::format("./{} {}", output, arguments);
+        std::string command = fmt::format("./{} {}", m_output, arguments);
 
         int platform = Platform::GetPlatform();
 

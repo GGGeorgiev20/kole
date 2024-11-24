@@ -7,7 +7,8 @@
 class DirectoryManager
 {
 public:
-    DirectoryManager(std::shared_ptr<BuildConfig> config);
+    DirectoryManager(std::shared_ptr<BuildConfig> config)
+        : m_config(std::move(config)) {}
 
     /**
      * @brief Initialize a new project.
@@ -26,8 +27,8 @@ public:
     /**
      * @brief Creates a directory if it doesn't exist.
      */
-    void CreateDirectory(std::string directory);
+    void CreateDirectory(const std::string& directory);
 
 private:
-    std::shared_ptr<BuildConfig> config;
+    std::shared_ptr<BuildConfig> m_config;
 };

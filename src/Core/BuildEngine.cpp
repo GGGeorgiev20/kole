@@ -1,22 +1,17 @@
 #include "Core/BuildEngine.hpp"
 
-#include "Utils/Logger/Logger.hpp"
-#include "Utils/Platform.hpp"
-
 #include <map>
 #include <algorithm>
 #include <fmt/core.h>
 #include <filesystem>
 #include <functional>
 
+#include "Utils/Logger/Logger.hpp"
+#include "Utils/Platform.hpp"
+
 namespace fs = std::filesystem;
 
-BuildEngine::BuildEngine(std::shared_ptr<BuildConfig> config)
-{
-    this->config = config;
-}
-
-std::string BuildEngine::GetOutputPath(std::string sourceFileName, std::string sourceExtension)
+std::string BuildEngine::GetOutputPath(std::string sourceFileName, const std::string& sourceExtension)
 {
     std::string outputExtension;
     std::string outputDirectory;
@@ -31,13 +26,13 @@ std::string BuildEngine::GetOutputPath(std::string sourceFileName, std::string s
     {
         outputExtension = "cpp";
         outputDirectory = "obj";
-        sourceFileName = config->qtSupport.at("moc_prefix") + sourceFileName;
+        sourceFileName = m_config->qtSupport.at("moc_prefix") + sourceFileName;
     }
     else if (sourceExtension == "ui")
     {
-        outputExtension = config->qtSupport.at("ui_extension");
-        outputDirectory = config->qtSupport.at("ui_output_dir");
-        sourceFileName = config->qtSupport.at("ui_prefix") + sourceFileName;
+        outputExtension = m_config->qtSupport.at("ui_extension");
+        outputDirectory = m_config->qtSupport.at("ui_output_dir");
+        sourceFileName = m_config->qtSupport.at("ui_prefix") + sourceFileName;
     }
     else
     {
@@ -55,7 +50,7 @@ std::string BuildEngine::GetOutputPath(std::string sourceFileName, std::string s
     return outputPath;
 }
 
-std::string BuildEngine::GetCompileCommandForFile(std::string sourceExtension, std::string sourcePath, std::string outputPath)
+std::string BuildEngine::GetCompileCommandForFile(const std::string& sourceExtension, const std::string& sourcePath, const std::string& outputPath)
 {
     if (sourceExtension == "cpp" || sourceExtension == "c")
     {
@@ -70,24 +65,23 @@ std::string BuildEngine::GetCompileCommandForFile(std::string sourceExtension, s
         return GetCompileCommandForUIFile(sourcePath, outputPath);
     }
 
+    Logger::Warning(fmt::format("Unrecognized source extension: '{}'", sourceExtension));
     return "";
 }
 
-std::string BuildEngine::GetLinkCommandForProject(std::vector<std::string> files, std::string output)
+std::string BuildEngine::GetLinkCommandForProject(const std::vector<std::string>& files, const std::string& output)
 {
     std::string flags = GetFlags();
     std::string objectFiles = "";
 
     for (const auto& file : files)
     {
-        objectFiles += fmt::format("{} ", file);
+        objectFiles += file + " ";
     }
-
-    objectFiles = objectFiles.substr(0, objectFiles.length() - 1);
 
     std::string command = fmt::format(
         "{} {} -o {} {}",
-        config->compiler,
+        m_config->compiler,
         objectFiles,
         output,
         flags
@@ -96,16 +90,16 @@ std::string BuildEngine::GetLinkCommandForProject(std::vector<std::string> files
     return command;
 }
 
-std::string BuildEngine::GetCompileCommandForSourceFile(std::string source, std::string output)
+std::string BuildEngine::GetCompileCommandForSourceFile(const std::string& source, const std::string& output)
 {
     std::string flags = GetFlags();
     std::string includePaths = GetIncludePaths();
 
     std::string command = fmt::format(
         "{} {}{} -c {} -o {} {} {}",
-        config->compiler,
-        config->languageVersion != "" ? "-std=" : "",
-        config->languageVersion,
+        m_config->compiler,
+        m_config->languageVersion != "" ? "-std=" : "",
+        m_config->languageVersion,
         source,
         output,
         includePaths,
@@ -115,7 +109,7 @@ std::string BuildEngine::GetCompileCommandForSourceFile(std::string source, std:
     return command;
 }
 
-std::string BuildEngine::GetCompileCommandForHeaderFile(std::string source, std::string output)
+std::string BuildEngine::GetCompileCommandForHeaderFile(const std::string& source, const std::string& output)
 {
     std::string command = fmt::format(
         "moc {} -o {} >/dev/null 2>&1",
@@ -131,7 +125,7 @@ std::string BuildEngine::GetCompileCommandForHeaderFile(std::string source, std:
     return command;
 }
 
-std::string BuildEngine::GetCompileCommandForUIFile(std::string source, std::string output)
+std::string BuildEngine::GetCompileCommandForUIFile(const std::string& source, const std::string& output)
 {
     std::string command = fmt::format(
         "uic {} -o {}",
@@ -144,51 +138,61 @@ std::string BuildEngine::GetCompileCommandForUIFile(std::string source, std::str
 
 std::string BuildEngine::GetFlags()
 {
-    if (!flags.empty()) return flags;
+    if (!m_flags.empty()) return m_flags;
 
-    std::string platformName = Platform::GetPlatformName();
-    transform(platformName.begin(), platformName.end(), platformName.begin(), ::tolower);
+    // Set default optimization to 'debug'
+    std::string optimization = m_optimizationLevels.at("debug");
 
-    std::string optimization = optimizationLevels.at("debug");
-
-    std::string optimizationLowercase = config->optimization;
+    std::string optimizationLowercase = m_config->optimization;
     transform(optimizationLowercase.begin(), optimizationLowercase.end(), optimizationLowercase.begin(), ::tolower);
 
-    if (optimizationLevels.count(optimizationLowercase) > 0)
+    // Check if user-given optimization is valid and present in optimizations map
+    if (m_optimizationLevels.contains(optimizationLowercase))
     {
-        optimization = optimizationLevels.at(optimizationLowercase);
+        optimization = m_optimizationLevels.at(optimizationLowercase);
         Logger::Debug(fmt::format("Setting optimization level to '{}' ({})", optimizationLowercase, optimization));
     }
     else
     {
         Logger::Warning(fmt::format("Optimization level '{}' not recognized", optimizationLowercase));
-        Logger::Warning("Defaulting to debug optimization level");
+        Logger::Debug("Defaulting to debug optimization level");
     }
 
-    std::string commonFlags = config->flags.at("common");
-    std::string platformSpecificFlags = config->flags.at(platformName);
+    std::string commonFlags = m_config->flags.at("common");
+    std::string platformName = Platform::GetPlatformName();
+    transform(platformName.begin(), platformName.end(), platformName.begin(), ::tolower);
 
-    flags = fmt::format("{} {} {}", optimization, commonFlags, platformSpecificFlags);
+    // If the platform specified was found, apply both common and platform-specific flags, if not then only common flags
+    if (m_config->flags.contains(platformName))
+    {
+        std::string platformSpecificFlags = m_config->flags.at(platformName);
+        m_flags = fmt::format("{} {} {}", optimization, commonFlags, platformSpecificFlags);
+    }
+    else
+    {
+        // I am calling GetPlatformName here again, because I want the name to not be only lowercase
+        Logger::Warning(fmt::format("Configuration for platform '{}' was not found", Platform::GetPlatformName()));
+        Logger::Info("Applying only common (platform-independent) flags");
+        m_flags = fmt::format("{} {}", optimization, commonFlags);
+    }
 
-    return flags;
+    return m_flags;
 }
 
 std::string BuildEngine::GetIncludePaths()
 {
-    if (!includePaths.empty()) return includePaths;
+    if (!m_includePaths.empty()) return m_includePaths;
 
-    for (const auto& includeDir : config->directories.at("include"))
+    for (const auto& includeDir : m_config->directories.at("include"))
     {
-        includePaths += fmt::format("-I{} ", includeDir);
+        m_includePaths += " -I" + includeDir;
     }
 
-    if (config->qtSupport.at("compile_ui") == "true")
-        includePaths += fmt::format("-I{} ", config->qtSupport.at("ui_output_dir"));
+    // Add directories holding compiled ui files to include paths
+    if (m_config->qtSupport.at("compile_ui") == ConfigConstants::TRUE)
+        m_includePaths += " -I{}" + m_config->qtSupport.at("ui_output_dir");
 
-    // Remove trailing whitespace
-    includePaths = includePaths.substr(0, includePaths.length() - 1);
+    Logger::Debug(fmt::format("Include paths are '{}'", m_includePaths));
 
-    Logger::Debug(fmt::format("Include paths are '{}'", includePaths));
-
-    return includePaths;
+    return m_includePaths;
 }

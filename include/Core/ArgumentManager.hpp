@@ -16,6 +16,13 @@ enum class Argument
     Initialize,
 };
 
+struct ArgumentInfo
+{
+    std::string shortName;
+    std::string longName;
+    std::string description;
+};
+
 class ArgumentManager
 {
 public:
@@ -44,14 +51,14 @@ public:
      *
      * @param argument The unrecognized argument.
      */
-    void PrintUnrecognizedArgument(std::string argument);
+    void PrintUnrecognizedArgument(const std::string& argument);
 
     /**
      * @brief Prints usage, unrecognized argument and exits.
      *
      * @param argument The unrecognized argument.
      */
-    void ArgumentNotFound(std::string argument);
+    void ArgumentNotFound(const std::string& argument);
 
     /**
      * @brief Retrieves the collected arguments for autorun.
@@ -66,18 +73,22 @@ public:
      * @param argument The argument to check.
      * @return The boolean state of the argument.
      */
-    bool GetArgumentState(Argument argument);
+    bool GetArgumentState(const Argument& argument);
 
 private:
-    int argc;
-    char** argv;
+    int m_argc;
+    char** m_argv;
 
-    const std::string description = "Build system for compiling and running C++ projects.";
+    const std::string m_description = "Build system for compiling and running C++ projects.";
 
-    std::string autorunArguments = "";
+    std::string m_autorunArguments = "";
+
+    // NOTE: I tried making argumentIdentifiers and argumentDescriptions to be inline static constexpr and replace std::string with const char*
+    // because that would make them get evaluated at compile time which is never bad and actually faster
+    // but because of its absance of methods, it's not worth enough to use it, so I just reverted to std::string
 
     // Map of arguments and their possible identifiers (flags)
-    const std::map<Argument, std::array<std::string, 2>> argumentIdentifiers = {
+    const std::map<Argument, std::array<std::string, 2>> m_argumentIdentifiers = {
         { Argument::Help,              { "h", "help" }    },
         { Argument::Rebuild,           { "r", "rebuild" } },
         { Argument::Autorun,           { "a", "autorun" } },
@@ -87,7 +98,7 @@ private:
     };
 
     // Map of arguments and their descriptions
-    const std::map<Argument, std::string> argumentDescriptions = {
+    const std::map<Argument, std::string> m_argumentDescriptions = {
         { Argument::Help,              "Display this help message and exit"    },
         { Argument::Rebuild,           "Rebuild all object files"              },
         { Argument::Autorun,           "Run the compiled binary automatically" },
@@ -97,7 +108,7 @@ private:
     };
 
     // Map to track the state (whether the argument was provided or not)
-    std::map<Argument, bool> argumentStates = {
+    std::map<Argument, bool> m_argumentStates = {
         { Argument::Help,              false },
         { Argument::Rebuild,           false },
         { Argument::Autorun,           false },

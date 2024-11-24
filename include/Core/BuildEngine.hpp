@@ -7,7 +7,8 @@
 class BuildEngine
 {
 public:
-    BuildEngine(std::shared_ptr<BuildConfig> config);
+    BuildEngine(std::shared_ptr<BuildConfig> config)
+        : m_config(std::move(config)) {}
 
     /**
      * @brief Generates the output path, given a source file.
@@ -20,7 +21,7 @@ public:
      *
      * @return The respective output path.
      */
-    std::string GetOutputPath(std::string sourceFileName, std::string sourceExtension);
+    std::string GetOutputPath(std::string sourceFileName, const std::string& sourceExtension);
 
     /**
      * @brief Generates the command to compile a file.
@@ -34,7 +35,7 @@ public:
      *
      * @return The formatted compile command.
      */
-    std::string GetCompileCommandForFile(std::string sourceExtension, std::string sourcePath, std::string outputPath);
+    std::string GetCompileCommandForFile(const std::string& sourceExtension, const std::string& sourcePath, const std::string& outputPath);
 
     /**
      * @brief Generates the command to link object files into a final binary.
@@ -47,7 +48,7 @@ public:
      *
      * @return The formatted link command.
      */
-    std::string GetLinkCommandForProject(std::vector<std::string> files, std::string output);
+    std::string GetLinkCommandForProject(const std::vector<std::string>& files, const std::string& output);
 
     /**
      * @brief Generates the command to compile a source file to an object file.
@@ -57,7 +58,7 @@ public:
      *
      * @return The formatted compile command.
      */
-    std::string GetCompileCommandForSourceFile(std::string source, std::string output);
+    std::string GetCompileCommandForSourceFile(const std::string& source, const std::string& output);
 
     /**
      * @brief Generates the command to compile a header file to a moc file.
@@ -67,7 +68,7 @@ public:
      *
      * @return The formatted compile command.
      */
-    std::string GetCompileCommandForHeaderFile(std::string source, std::string output);
+    std::string GetCompileCommandForHeaderFile(const std::string& source, const std::string& output);
 
     /**
      * @brief Generates the command to compile a UI file to a UI header file.
@@ -77,7 +78,7 @@ public:
      *
      * @return The formatted compile command.
      */
-    std::string GetCompileCommandForUIFile(std::string source, std::string output);
+    std::string GetCompileCommandForUIFile(const std::string& source, const std::string& output);
 
     /**
      * @brief Retrieves and caches the necessary compile flags.
@@ -99,18 +100,19 @@ public:
     std::string GetIncludePaths();
 
 private:
-    std::shared_ptr<BuildConfig> config;
+    std::shared_ptr<BuildConfig> m_config;
 
-    std::string flags = std::string();
-    std::string includePaths = std::string();
+    // I am using the std::string constructor here because I need to be able to check if it's empty
+    std::string m_flags = std::string();
+    std::string m_includePaths = std::string();
 
-    std::map<std::string, std::string> optimizationLevels = {
+    std::map<std::string, std::string> m_optimizationLevels = {
         { "none",         "-O0"    },  // No optimization
         { "opt1",         "-O1"    },  // Optimization Level 1
         { "opt2",         "-O2"    },  // Optimization Level 2
         { "release",      "-O3"    },  // Optimization Level 3
         { "fast",         "-Ofast" },  // Aggressive optimization
-        { "debug",        "-Og"    },  // Optimization perfected for debugging
+        { "debug",        "-Og"    },  // Optimization for the best debugging experience
         { "size",         "-Os"    },  // Optimization for size
     };
 };

@@ -13,11 +13,13 @@ int main(int argc, char** argv)
     if (argumentManager->GetArgumentState(Argument::Debug))
         LogTypes::EnableDebug();
 
-    if (argumentManager->GetArgumentState(Argument::Config))
-        ConfigReader::CreateConfig();
+    std::shared_ptr<ConfigReader> configReader = ConfigReader::GetInstance();
 
-    std::shared_ptr<BuildConfig> config = ConfigReader::GetBuildConfig();
-    ConfigReader::PostProcess();
+    if (argumentManager->GetArgumentState(Argument::Config))
+        configReader->CreateConfig();
+
+    std::shared_ptr<BuildConfig> config = configReader->GetBuildConfig();
+    configReader->PostProcess();
 
     std::shared_ptr<DirectoryManager> directoryManager = std::make_shared<DirectoryManager>(config);
 

@@ -5,16 +5,11 @@
 
 namespace fs = std::filesystem;
 
-DirectoryManager::DirectoryManager(std::shared_ptr<BuildConfig> config)
-{
-    this->config = config;
-}
-
 void DirectoryManager::InitializeProject()
 {
     // A config file should have already been created
 
-    for (const auto& [directoryKey, directories] : config->directories)
+    for (const auto& [directoryKey, directories] : m_config->directories)
     {
         for (const auto& directory : directories)
         {
@@ -27,13 +22,13 @@ void DirectoryManager::InitializeProject()
 
 void DirectoryManager::CreateDirectories()
 {
-    for (const auto& directory : config->autocreate)
+    for (const auto& directory : m_config->autocreate)
     {
         CreateDirectory(directory);
     }
 }
 
-void DirectoryManager::CreateDirectory(std::string directory)
+void DirectoryManager::CreateDirectory(const std::string& directory)
 {
     if (directory.empty()) return;
 

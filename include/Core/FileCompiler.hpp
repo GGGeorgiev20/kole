@@ -10,7 +10,12 @@ namespace fs = std::filesystem;
 class FileCompiler
 {
 public:
-    FileCompiler(std::shared_ptr<BuildConfig> config);
+    FileCompiler(std::shared_ptr<BuildConfig> config)
+        : m_config(std::move(config))
+    {
+        m_buildEngine = std::make_shared<BuildEngine>(m_config);
+        this->SetupDirectories();
+    }
 
     /**
      * @brief Adds relevant directories to an array for compilation.
@@ -39,7 +44,7 @@ public:
      * @param sourcePath The path to the source file.
      * @param rebuild Whether to rebuild the file.
      */
-    void CompileObjectFile(fs::path sourcePath, bool rebuild);
+    void CompileObjectFile(const fs::path& sourcePath, bool rebuild);
 
     /**
      * @brief Links object files into a binary executable.
@@ -56,19 +61,18 @@ public:
      *
      * @param arguments Arguments to pass to the executable.
      */
-    void RunBinaryExecutable(std::string arguments);
+    void RunBinaryExecutable(const std::string& arguments);
 
 private:
-    std::shared_ptr<BuildConfig> config;
-    std::shared_ptr<BuildEngine> buildEngine;
+    std::shared_ptr<BuildConfig> m_config;
+    std::shared_ptr<BuildEngine> m_buildEngine;
 
     // NOTE: Usually, only files in the src directories are compiled.
     // But if the user is using Qt, UI & header files also need to be compiled.
     // So instead of checking 3 different arrays of directories,
     // just add the UI, include & src directories to one array
-    std::vector<std::string> directoriesForCompilation;
+    std::vector<std::string> m_directoriesForCompilation;
 
-    // NOTE: The output of the LinkObjectFiles is saved
-    // so that it can be ran later by RunBinaryExecutable if needed
-    std::string output;
+    // NOTE: The output of the LinkObjectFiles is saved, so that it can be ran later by RunBinaryExecutable if needed
+    std::string m_output;
 };

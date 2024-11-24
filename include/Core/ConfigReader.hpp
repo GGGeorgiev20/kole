@@ -13,19 +13,27 @@
 
 #include "Utils/Platform.hpp"
 
+namespace ConfigConstants
+{
+    inline constexpr const char* AUTO = "auto";
+    inline constexpr const char* FALSE = "false";
+    inline constexpr const char* TRUE = "true";
+}
+
 struct BuildConfig
 {
     std::string output = "main";
-    std::string extension = "auto";
+    std::string extension = ConfigConstants::AUTO;
 
-    std::string platform = "auto";
+    std::string platform = ConfigConstants::AUTO;
 
+    // NOTE: The value of the map is a vector, not an array because these values (if not default) are got from the config and can have more than 1 elements
     std::map<std::string, std::vector<std::string>> directories = {
-        { "src",              {   "src"   } },
-        { "ui",               {    ""     } },
-        { "obj",              {   "obj"   } },
-        { "bin",              {   "bin"   } },
-        { "include",          { "include" } },
+        { "src",          { "src" }     },
+        { "ui",           { "" }        },
+        { "obj",          { "obj" }     },
+        { "bin",          { "bin" }     },
+        { "include",      { "include" } },
     };
 
     std::vector<std::string> autocreate = { "obj", "bin" };
@@ -44,12 +52,12 @@ struct BuildConfig
     // but in that case I will have to check if they're a specific type
     // every time they're cast (and that's annoying so I just won't bother)
     std::map<std::string, std::string> qtSupport = {
-        { "compile_ui",         "false" },
-        { "compile_moc",        "false" },
-        { "ui_prefix",           "ui_"  },
-        { "ui_extension",        "h"    },
-        { "ui_output_dir",       "ui"   },
-        { "moc_prefix",         "moc_"  },
+        { "compile_ui",         ConfigConstants::FALSE },
+        { "compile_moc",        ConfigConstants::FALSE },
+        { "ui_prefix",          "ui_"                  },
+        { "ui_extension",       "h"                    },
+        { "ui_output_dir",      "ui"                   },
+        { "moc_prefix",         "moc_"                 },
     };
 
     std::string compiler = "g++";
@@ -58,8 +66,17 @@ struct BuildConfig
     std::string optimization = "debug";
 };
 
-namespace ConfigReader
+class ConfigReader
 {
+public:
+    static std::shared_ptr<ConfigReader> GetInstance()
+    {
+        if (m_instance == nullptr)
+            m_instance = std::make_shared<ConfigReader>();
+
+        return m_instance;
+    }
+
     /**
      * @brief Creates a default configuration file if one doesn't exist.
      */
@@ -85,7 +102,7 @@ namespace ConfigReader
      * @param property The raw property value.
      * @return The processed value.
      */
-    std::string ProcessProperty(std::string property);
+    std::string ProcessProperty(const std::string& property);
 
     /**
      * @brief Processes a list of property values.
@@ -93,7 +110,7 @@ namespace ConfigReader
      * @param property The raw list of property values.
      * @return The processed list of values.
      */
-    std::vector<std::string> ProcessProperty(std::vector<std::string> property);
+    std::vector<std::string> ProcessProperty(const std::vector<std::string>& property);
 
     /**
      * @brief Retrieves the cached config or reads a new one.
@@ -103,11 +120,25 @@ namespace ConfigReader
      */
     std::shared_ptr<BuildConfig> GetBuildConfig();
 
-    // NAMESPACE VARIABLES
+private:
+    static std::shared_ptr<ConfigReader> m_instance;
 
-    extern std::string configPath;
-    extern std::shared_ptr<BuildConfig> buildConfig;
-    extern std::unordered_set<std::string> recognizedKeys;
+    std::shared_ptr<BuildConfig> m_buildConfig = nullptr;
 
-    extern std::string defaultConfig;
+    std::string m_defaultConfigPath = "./assets/KoleConfig.default.yaml";
+
+    std::string m_configPath = "./KoleConfig.yaml";
+    std::array<std::string, 11> m_recognizedKeys = {
+        "output",
+        "extension",
+        "platform",
+        "directories",
+        "autocreate",
+        "exclude",
+        "flags",
+        "qt_support",
+        "compiler",
+        "language_version",
+        "optimization"
+    };
 };

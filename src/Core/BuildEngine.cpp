@@ -11,6 +11,12 @@
 
 namespace fs = std::filesystem;
 
+BuildEngine::BuildEngine(std::shared_ptr<BuildConfig> config)
+{
+    m_config = config;
+    m_flagManager = std::make_unique<FlagManager>(m_config);
+}
+
 std::string BuildEngine::GetOutputPath(std::string sourceFileName, const std::string& sourceExtension)
 {
     std::string outputExtension;
@@ -71,7 +77,7 @@ std::string BuildEngine::GetCompileCommandForFile(const std::string& sourceExten
 
 std::string BuildEngine::GetLinkCommandForProject(const std::vector<std::string>& files, const std::string& output)
 {
-    std::string flags = GetFlags();
+    std::string flags = m_flagManager->GetFlags();
     std::string objectFiles = "";
 
     for (const auto& file : files)
@@ -92,8 +98,8 @@ std::string BuildEngine::GetLinkCommandForProject(const std::vector<std::string>
 
 std::string BuildEngine::GetCompileCommandForSourceFile(const std::string& source, const std::string& output)
 {
-    std::string flags = GetFlags();
-    std::string includePaths = GetIncludePaths();
+    std::string flags = m_flagManager->GetFlags();
+    std::string includePaths = m_flagManager->GetIncludePaths();
 
     std::string command = fmt::format(
         "{} {}{} -c {} -o {} {} {}",
@@ -134,65 +140,4 @@ std::string BuildEngine::GetCompileCommandForUIFile(const std::string& source, c
     );
 
     return command;
-}
-
-std::string BuildEngine::GetFlags()
-{
-    if (!m_flags.empty()) return m_flags;
-
-    // Set default optimization to 'debug'
-    std::string optimization = m_optimizationLevels.at("debug");
-
-    std::string optimizationLowercase = m_config->optimization;
-    transform(optimizationLowercase.begin(), optimizationLowercase.end(), optimizationLowercase.begin(), ::tolower);
-
-    // Check if user-given optimization is valid and present in optimizations map
-    if (m_optimizationLevels.contains(optimizationLowercase))
-    {
-        optimization = m_optimizationLevels.at(optimizationLowercase);
-        Logger::Debug(fmt::format("Setting optimization level to '{}' ({})", optimizationLowercase, optimization));
-    }
-    else
-    {
-        Logger::Warning(fmt::format("Optimization level '{}' not recognized", optimizationLowercase));
-        Logger::Debug("Defaulting to debug optimization level");
-    }
-
-    std::string commonFlags = m_config->flags.at("common");
-    std::string platformName = Platform::GetPlatformName();
-    transform(platformName.begin(), platformName.end(), platformName.begin(), ::tolower);
-
-    // If the platform specified was found, apply both common and platform-specific flags, if not then only common flags
-    if (m_config->flags.contains(platformName))
-    {
-        std::string platformSpecificFlags = m_config->flags.at(platformName);
-        m_flags = fmt::format("{} {} {}", optimization, commonFlags, platformSpecificFlags);
-    }
-    else
-    {
-        // I am calling GetPlatformName here again, because I want the name to not be only lowercase
-        Logger::Warning(fmt::format("Configuration for platform '{}' was not found", Platform::GetPlatformName()));
-        Logger::Info("Applying only common (platform-independent) flags");
-        m_flags = fmt::format("{} {}", optimization, commonFlags);
-    }
-
-    return m_flags;
-}
-
-std::string BuildEngine::GetIncludePaths()
-{
-    if (!m_includePaths.empty()) return m_includePaths;
-
-    for (const auto& includeDir : m_config->directories.at("include"))
-    {
-        m_includePaths += " -I" + includeDir;
-    }
-
-    // Add directories holding compiled ui files to include paths
-    if (m_config->qtSupport.at("compile_ui") == ConfigConstants::TRUE)
-        m_includePaths += " -I{}" + m_config->qtSupport.at("ui_output_dir");
-
-    Logger::Debug(fmt::format("Include paths are '{}'", m_includePaths));
-
-    return m_includePaths;
 }

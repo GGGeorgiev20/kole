@@ -122,7 +122,7 @@ void ArgumentManager::PrintHelp()
     {
         std::string identifiers = "";
 
-        for (size_t i = 0; i < value.size(); i++)
+        for (std::size_t i = 0; i < value.size(); i++)
         {
             if (i > 0) identifiers += ", ";
 
@@ -145,7 +145,7 @@ void ArgumentManager::PrintUsage()
         // Because of that, we can check if the first element has a length longer than 1 (is long-hand)
         // and if it is, add an extra '-'.
         printf(" [");
-        for (size_t i = 0; i < value.size(); i++)
+        for (std::size_t i = 0; i < value.size(); i++)
         {
             const auto& identifier = value[i];
 

@@ -11,7 +11,7 @@ class FileCompiler
 {
 public:
     FileCompiler(std::shared_ptr<BuildConfig> config)
-        : m_config(std::move(config))
+        : m_config(config)
     {
         m_buildEngine = std::make_shared<BuildEngine>(m_config);
         this->SetupDirectories();

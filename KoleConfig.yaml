@@ -12,7 +12,7 @@ autocreate: [ obj, bin ]
 flags:
   common: -Wall -Wunused-variable -Wextra -Wno-enum-compare -g -ggdb -fdiagnostics-color=always
   windows: -static-libstdc++ -lfmt -lyaml-cpp
-  linux: -lm -lpthread -ldl -lrt -lX11 -lfmt -lyaml-cpp
+  linux: -lm -lpthread -ldl -lrt -lX11 -lfmt -lyaml-cpp $qt
 
 compiler: g++
 language_version: c++20

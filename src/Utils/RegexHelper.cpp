@@ -13,7 +13,7 @@ std::string RegexHelper::HandlePathSeparators(const std::string& pattern)
 
     std::string backslashBuffer;
 
-    for (size_t i = 0; i < pattern.size(); ++i)
+    for (std::size_t i = 0; i < pattern.size(); ++i)
     {
         const char& c = pattern[i];
 

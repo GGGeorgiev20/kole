@@ -50,8 +50,15 @@ void FileCompiler::CompileObjectFiles(bool rebuild)
     {
         const fs::path dirPath = dir;
 
-        if (RegexHelper::MatchesRegex(dirPath, m_config->exclude)) {
+        if (RegexHelper::MatchesRegex(dirPath, m_config->exclude))
+        {
             Logger::Info(fmt::format("Skipping excluded directory '{}'", dirPath.string()));
+            continue;
+        }
+
+        if (!fs::exists(dirPath))
+        {
+            Logger::Error(fmt::format("Source directory '{}' doesn't exist, skipping...", dir));
             continue;
         }
 
@@ -79,8 +86,6 @@ void FileCompiler::CompileObjectFiles(bool rebuild)
                 continue;
 
             this->CompileObjectFile(sourcePath, rebuild);
-
-            Logger::Info(fmt::format("Compiled {}", sourcePath.string()));
         }
     }
 }
@@ -130,6 +135,8 @@ void FileCompiler::CompileObjectFile(const fs::path& sourcePath, bool rebuild)
 
         if (exitStatus != 0)
             throw std::runtime_error(command);
+
+        Logger::Info(fmt::format("Compiled {}", sourcePath.string()));
     }
     catch (const std::runtime_error& command)
     {

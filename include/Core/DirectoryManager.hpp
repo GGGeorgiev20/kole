@@ -8,7 +8,7 @@ class DirectoryManager
 {
 public:
     DirectoryManager(std::shared_ptr<BuildConfig> config)
-        : m_config(std::move(config)) {}
+        : m_config(config) {}
 
     /**
      * @brief Initialize a new project.

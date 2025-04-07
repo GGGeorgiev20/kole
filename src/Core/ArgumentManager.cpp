@@ -12,20 +12,35 @@ ArgumentManager::ArgumentManager(int argc, char** argv)
 
 void ArgumentManager::ProcessArguments()
 {
+    // NOTE: No debug logs can be used here as they won't be enabled until the debug argument is processed.
+
     // Skip the first argument, as it's the name of the executable
     for (int i = 1; i < m_argc; i++)
     {
         std::string argument(m_argv[i]);
-        Logger::Debug(fmt::format("Processing argument '{}'", argument));
 
+        // If the autorun argument has been 
         if (m_argumentStates.at(Argument::Autorun))
         {
             m_autorunArguments += fmt::format("{} ", argument);
             continue;
         }
 
-        if (argument.length() <= 1 || argument[0] != '-')
-            ArgumentNotFound(argument);
+        if (argument.length() == 1)
+        {
+            if (argument[0] == '-')
+                this->PrintUnspecifiedArgument(false);
+            else
+                this->PrintUnrecognizedArgument(argument);
+        }
+
+        if (argument.length() == 2 && argument[1] == '-')
+        {
+            if (argument[1] == '-')
+                this->PrintUnspecifiedArgument(true);
+            else
+                this->PrintUnrecognizedArgument(argument);
+        }
 
         bool longhand = argument[1] == '-';
 
@@ -39,6 +54,7 @@ void ArgumentManager::ProcessArguments()
         {
             if (longhand)
             {
+                // The first element of the value array is the short-hand, the second is the long-hand
                 if (sequence == value[1])
                 {
                     m_argumentStates[key] = true;
@@ -49,35 +65,25 @@ void ArgumentManager::ProcessArguments()
             {
                 for (char c : sequence)
                 {
-                    // This is the same as using char except that string methods can be used on this.
-                    // In this case, compare value[0] which is a string with the option (which is also now a string)
+                    // This converts the char to a string to use the string comparison methods
                     std::string option(1, c);
 
                     if (option == value[0])
                     {
                         m_argumentStates[key] = true;
                         argumentIsFound = true;
-
-                        if (key == Argument::Help)
-                        {
-                            Logger::Debug("Help argument found. Stopping program and displaying help menu");
-                            PrintHelp();
-                            exit(0);
-                        }
+                        break;
                     }
                 }
             }
+
+            if (argumentIsFound && key == Argument::Help)
+            {
+                this->PrintHelp();
+                exit(0);
+            }
+            else if (!argumentIsFound) this->PrintUnrecognizedArgument(argument);
         }
-
-        if (!argumentIsFound)
-            ArgumentNotFound(argument);
-    }
-
-
-    for (const auto& [key, value] : m_argumentIdentifiers)
-    {
-        if (m_argumentStates.at(key) == true)
-            Logger::Debug(fmt::format("Argument with identifier {} has state of true.", value[1]));
     }
 }
 
@@ -125,8 +131,8 @@ void ArgumentManager::PrintHelp()
         for (std::size_t i = 0; i < value.size(); i++)
         {
             if (i > 0) identifiers += ", ";
-
             if (value[i].length() > 1) identifiers += "-";
+
             identifiers += "-" + value[i];
         }
 
@@ -139,6 +145,7 @@ void ArgumentManager::PrintHelp()
 void ArgumentManager::PrintUsage()
 {
     printf("usage: kole");
+
     for (const auto& [key, value] : m_argumentIdentifiers)
     {
         // The arguments in the argument map are sorted so that the first element is always the short-hand, if it has one.
@@ -151,37 +158,42 @@ void ArgumentManager::PrintUsage()
 
             if (i > 0) printf(", ");
             if (identifier.length() > 1) printf("-");
+
             printf("-%s", identifier.c_str());
         }
+
         printf("]");
     }
+
     printf("\n");
 }
 
 void ArgumentManager::PrintUnrecognizedArgument(const std::string& argument)
 {
-    Logger::Error(fmt::format("Error: Unrecognized argument '{}'", argument));
+    printf("%s\n", fmt::format("kole: error: unrecognized argument '{}'", argument).c_str());
+    printf("info: use -h or --help for help\n");
+    exit(1);
 }
 
-void ArgumentManager::ArgumentNotFound(const std::string& argument)
+void ArgumentManager::PrintUnspecifiedArgument(bool longhand)
 {
-    PrintUsage();
-    PrintUnrecognizedArgument(argument);
+    printf("%s\n", fmt::format("kole: error: unspecified argument after '{}'", longhand ? "--" : "-").c_str());
+    printf("info: use -h or --help for help\n");
     exit(1);
 }
 
 std::string ArgumentManager::GetAutorunArguments()
 {
-    if (this->m_autorunArguments.empty())
+    if (m_autorunArguments.empty())
     {
         Logger::Debug("No arguments for autorun were found");
     }
     else
     {
-        Logger::Debug(fmt::format("Arguments for binary execution: [{}]", this->m_autorunArguments));
+        Logger::Debug(fmt::format("Arguments for binary execution: [{}]", m_autorunArguments));
     }
 
-    return this->m_autorunArguments;
+    return m_autorunArguments;
 }
 
 bool ArgumentManager::GetArgumentState(const Argument& argument)

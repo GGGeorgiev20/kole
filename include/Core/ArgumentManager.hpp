@@ -54,11 +54,11 @@ public:
     void PrintUnrecognizedArgument(const std::string& argument);
 
     /**
-     * @brief Prints usage, unrecognized argument and exits.
-     *
-     * @param argument The unrecognized argument.
+     * @brief Prints an error message for unspecified argument.
+     * 
+     * @param longhand Whether the argument is longhand.
      */
-    void ArgumentNotFound(const std::string& argument);
+    void PrintUnspecifiedArgument(bool longhand);
 
     /**
      * @brief Retrieves the collected arguments for autorun.

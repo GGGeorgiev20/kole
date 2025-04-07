@@ -7,8 +7,6 @@
 
 namespace fs = std::filesystem;
 
-std::shared_ptr<ConfigReader> ConfigReader::m_instance = nullptr;
-
 void ConfigReader::CreateConfig()
 {
     if (fs::exists(m_configPath))

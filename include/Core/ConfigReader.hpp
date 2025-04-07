@@ -69,13 +69,7 @@ struct BuildConfig
 class ConfigReader
 {
 public:
-    static std::shared_ptr<ConfigReader> GetInstance()
-    {
-        if (m_instance == nullptr)
-            m_instance = std::make_shared<ConfigReader>();
-
-        return m_instance;
-    }
+    ConfigReader(std::string configPath) : m_configPath(configPath) {}
 
     /**
      * @brief Creates a default configuration file if one doesn't exist.
@@ -127,7 +121,7 @@ private:
 
     std::string m_defaultConfigPath = "./assets/KoleConfig.default.yaml";
 
-    std::string m_configPath = "./KoleConfig.yaml";
+    std::string m_configPath;
     std::array<std::string, 11> m_recognizedKeys = {
         "output",
         "extension",

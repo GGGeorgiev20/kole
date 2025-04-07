@@ -13,7 +13,8 @@ int main(int argc, char** argv)
     if (argumentManager->GetArgumentState(Argument::Debug))
         LogTypes::EnableDebug();
 
-    std::shared_ptr<ConfigReader> configReader = ConfigReader::GetInstance();
+    const std::string configPath = "./KoleConfig.yaml";
+    std::shared_ptr<ConfigReader> configReader = std::make_shared<ConfigReader>(configPath);
 
     if (argumentManager->GetArgumentState(Argument::Config))
         configReader->CreateConfig();

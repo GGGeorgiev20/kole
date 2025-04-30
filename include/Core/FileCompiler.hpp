@@ -44,7 +44,7 @@ public:
      * @param sourcePath The path to the source file.
      * @param rebuild Whether to rebuild the file.
      */
-    void CompileObjectFile(const fs::path& sourcePath, bool rebuild);
+    void CompileObjectFile(fs::path parentDirectory, fs::path childPath, bool rebuild);
 
     /**
      * @brief Links object files into a binary executable.

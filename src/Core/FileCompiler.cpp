@@ -49,6 +49,7 @@ void FileCompiler::CompileObjectFiles(bool rebuild)
     for (const auto& dir : m_directoriesForCompilation)
     {
         const fs::path dirPath = dir;
+        Logger::Debug(fmt::format("Processing directory '{}'", dirPath.string()));
 
         if (RegexHelper::MatchesRegex(dirPath, m_config->exclude))
         {
@@ -85,26 +86,34 @@ void FileCompiler::CompileObjectFiles(bool rebuild)
             if (!fs::is_regular_file(entry))
                 continue;
 
-            this->CompileObjectFile(sourcePath, rebuild);
+            fs::path childPath = fs::relative(sourcePath, dirPath);
+
+            this->CompileObjectFile(dirPath, childPath, rebuild);
         }
     }
 }
 
-void FileCompiler::CompileObjectFile(const fs::path& sourcePath, bool rebuild)
+void FileCompiler::CompileObjectFile(fs::path parentDirectory, fs::path childPath, bool rebuild)
 {
     // Get filename without path
-    const std::string sourceFileName = sourcePath.stem().string();
-    const std::string sourceExtension = sourcePath.extension().string().substr(1);
+    const std::string& extension = childPath.extension().string().substr(1);
+    const std::string& path = childPath.replace_extension("").string();
+
+    fs::path sourcePath = parentDirectory / childPath;
+    sourcePath.replace_extension(extension);
 
     try
     {
-        const std::string outputPath = m_buildEngine->GetOutputPath(sourceFileName, sourceExtension);
+        const std::string outputPathStr = m_buildEngine->GetOutputPath(path, extension);
 
-        if (outputPath == "")
+        if (outputPathStr == "")
         {
             Logger::Warning(fmt::format("Skipping compilation of file '{}'", sourcePath.string()));
             return;
         }
+
+        fs::path outputPath = outputPathStr;
+        fs::create_directories(outputPath.parent_path());
 
         const fs::path outputFile = outputPath;
 
@@ -122,7 +131,7 @@ void FileCompiler::CompileObjectFile(const fs::path& sourcePath, bool rebuild)
             }
         }
 
-        const std::string command = m_buildEngine->GetCompileCommandForFile(sourceExtension, sourcePath.string(), outputPath);
+        const std::string command = m_buildEngine->GetCompileCommandForFile(extension, sourcePath.string(), outputPath);
 
         // Safety check
         if (command.empty())
@@ -157,12 +166,22 @@ void FileCompiler::LinkObjectFiles()
 
     std::vector<std::string> objects;
 
-    const fs::directory_iterator objDir (objPath);
+    // const fs::directory_iterator objDir (objPath);
 
-    for (auto const& file : objDir)
-    {
-        const std::string filePath = file.path().string();
-        objects.push_back(filePath);
+    // for (auto const& file : objDir)
+    // {
+    //     const std::string filePath = file.path().string();
+    //     objects.push_back(filePath);
+    // }
+
+    for (auto it = fs::recursive_directory_iterator(objPath); it != fs::recursive_directory_iterator(); ++it) {
+        const fs::directory_entry& entry = *it;
+        const fs::path path = entry.path();
+
+        if (!fs::is_regular_file(entry))
+            continue;
+
+        objects.push_back(path.string());
     }
 
     m_output = fmt::format(

@@ -10,7 +10,7 @@ void LogTypes::EnableDebug()
 // This variable is used to disable any log types
 // Debug is disabled by default, it can be enabled using the '--debug' flag
 std::map<LogTypes::LogType, bool> LogTypes::LogTypeStatuses = {
-    { LogType::Debug,          false },
+    { LogType::Debug,          true },
     { LogType::Info,           true  },
     { LogType::Warning,        true  },
     { LogType::Error,          true  },
